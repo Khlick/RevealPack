@@ -42,13 +42,17 @@ jobs:
         run: python -m build
       - name: Check the built package
         run: twine check dist/*
-      - name: Upload to PyPI
+      - name: Upload package to release assets
+        uses: actions/upload-release-asset@v1
         env:
-          TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
-          TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
-        run: twine upload dist/*
+          GITHUB_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
+        with:
+          upload_url: ${{ needs.setup-release.outputs.upload_url }}
+          asset_path: ./dist/*.whl
+          asset_name: package-${{ github.ref_name }}.whl
+          asset_content_type: application/zip
       - name: Upload documentation to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
+        uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./site
+          publish_dir: ./revealpack/site
