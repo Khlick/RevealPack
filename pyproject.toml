@@ -3,8 +3,8 @@ requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "revealpack"
-version = "0.1.1"
+name = "RevealPack"
+version = "1.0.0"
 authors = [
   { name="Khris Griffis, Ph.D.", email="khris.griffis.phd@gmail.com" }
 ]

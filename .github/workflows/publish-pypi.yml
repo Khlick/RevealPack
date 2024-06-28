@@ -6,12 +6,16 @@ on:
       - 'v*.*.*' 
 
 permissions:
-  contents: write  # Ensure GITHUB_TOKEN has write permissions for contents
+  contents: write
+  id-token: write
 
 jobs:
   create-release:
     name: Create Release
     runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/RevealPack
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -22,9 +26,7 @@ jobs:
           python-version: '3.12'
 
       - name: Install dependencies
-        run: |
-          pip install -r requirements.txt
-          pip install build twine
+        run: pip install -r requirements.txt
 
       - name: Build the package
         run: python -m build
@@ -32,8 +34,13 @@ jobs:
       - name: Check the built package
         run: twine check dist/*
 
-      - name: Debug - List files in dist directory
-        run: ls -la dist
+      - name: Publish RevealPack to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+
+      - name: Get tag message
+        id: tag_message
+        run: |
+          echo "TAG_MESSAGE=$(git for-each-ref --format='%(subject)' $(git for-each-ref --format='%(refname)' | grep ${GITHUB_REF}))" >> $GITHUB_ENV
 
       - name: Create Release and Upload Assets
         uses: softprops/action-gh-release@v2
@@ -42,5 +49,6 @@ jobs:
           files: |
             dist/*.whl
             dist/*.tar.gz
+          body: ${{ env.TAG_MESSAGE }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
