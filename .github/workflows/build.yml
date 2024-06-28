@@ -5,6 +5,9 @@ on:
     tags:
       - 'v*.*.*' 
 
+permissions:
+  contents: write  # Ensure GITHUB_TOKEN has write permissions for contents
+
 jobs:
   create-release:
     name: Create Release
