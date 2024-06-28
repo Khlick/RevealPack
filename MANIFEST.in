@@ -1,0 +1,5 @@
+include LICENSE
+include README.md
+include revealpack/config.json
+recursive-include revealpack/assets *
+recursive-include site *
