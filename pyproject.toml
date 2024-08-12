@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "RevealPack"
-version = "1.0.2"
+version = "1.0.3"
 authors = [
   { name="Khris Griffis, Ph.D.", email="khris.griffis.phd@gmail.com" }
 ]
@@ -37,4 +37,4 @@ Issues = "https://github.com/Khlick/RevealPack/issues"
 revealpack = "revealpack.cli:cli"
 
 [tool.setuptools.package-data]
-"revealpack" = ["assets/**/*", "config.json","site/**/*"]
+"revealpack" = ["assets/**/*", "site/**/*"]
