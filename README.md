@@ -99,16 +99,6 @@ your-project-directory/
     └── ... (build output)
 ```
 
-## Example
-
-To see a complete example and detailed usage, refer to the [example.md](example.md) file.
-
 ## Documentation
 
-For more detailed documentation on configuration options, slide options, and more, refer to the following files:
-
-- [Presentation Options](presentation.md)
-- [Slide Options](slide.md)
-- [Commands](commands.md)
-- [Configuration](config.md)
-- [Developer Guide](dev.md)
+For more detailed documentation on configuration options, slide options, and more, refer to `revealpack docs`.

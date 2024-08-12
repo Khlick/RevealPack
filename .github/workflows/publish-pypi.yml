@@ -36,6 +36,9 @@ jobs:
 
       - name: Check the built package
         run: twine check dist/*
+      
+      - name: List built package contents
+        run: tar -tzf dist/*.tar.gz
 
       - name: Publish RevealPack to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
