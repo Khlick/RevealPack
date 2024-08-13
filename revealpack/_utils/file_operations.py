@@ -109,9 +109,17 @@ def cleanup_temp_files(files_list):
         else:
             logging.warning(f"File not found: {file_path}")
         
-        # Check if the parent directory is empty and remove it if so
+        # Check if the parent directory exists and is empty, then remove it
         parent_dir = os.path.dirname(file_path)
-        while parent_dir and not os.listdir(parent_dir):
-            os.rmdir(parent_dir)
-            logging.debug(f"Deleted empty directory: {parent_dir}")
+        while parent_dir:
+            if os.path.exists(parent_dir):
+                if not os.listdir(parent_dir):  # Check if directory is empty
+                    os.rmdir(parent_dir)
+                    logging.debug(f"Deleted empty directory: {parent_dir}")
+                else:
+                    break  # Stop if directory is not empty
+            else:
+                logging.debug(f"Directory does not exist: {parent_dir}")
+                break  # Exit the loop if the directory doesn't exist
+            
             parent_dir = os.path.dirname(parent_dir)
