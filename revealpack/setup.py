@@ -311,7 +311,7 @@ def create_reveal_template():
             <div class="slides">
                 {{% if deck.titlepage %}}
                 <section id="deck-title-slide" {{%- if deck.titlepage.background -%}}{{%- for i, v in deck.titlepage.background.items() -%}} data-background-{{{{ i }}}}="{{{{ v }}}}"{{%- endfor -%}}{{%- endif -%}}>
-                    <div class="title-slide">
+                    <div class="title-slide{{%- if deck.titlepage.background -%}} background{{%- endif -%}}">
                     {{% if deck.titlepage.image %}}
                         <div class="image" style="background-image: url({{{{ deck.titlepage.image }}}});"></div>
                     {{% endif %}}

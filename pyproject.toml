@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "RevealPack"
-version = "1.0.5"
+version = "1.0.6"
 authors = [
   { name="Khris Griffis, Ph.D.", email="khris.griffis.phd@gmail.com" }
 ]
