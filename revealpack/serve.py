@@ -33,8 +33,8 @@ class Watcher:
 
 
 class WatchHandler(FileSystemEventHandler):
-    debounce_delay = 5  # prevent multiple rapid triggers
-    cooldown_time = 45  # refractory period after first build
+    debounce_delay = 3  # prevent multiple rapid triggers
+    cooldown_time = 35  # refractory period after first build
     last_build_time = 0
     timer = None
     pending_trigger = False
