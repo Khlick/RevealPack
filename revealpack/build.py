@@ -293,7 +293,8 @@ def compile_theme():
     if len(files_copied):
         logging.info("Removing temporary files from compiling theme.")
         files_copied = list(set(files_copied))
-        cleanup_temp_files(files_copied.sort(reverse=True))
+        files_copied.sort(reverse=True)
+        cleanup_temp_files(files_copied)
 
 def copy_reveal():
     """Copy relevant Reveal.js files to the build directory."""
