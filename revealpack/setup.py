@@ -194,11 +194,12 @@ def create_reveal_template():
 
     external_plugin_names = []
     for plugin, details in external_plugins.items():
-        alias = details.get("alias", plugin)
-        mainjs = details.get("main", alias)  # Use alias if main is not provided
-        if mainjs.endswith(".js"):
-            mainjs = mainjs[:-3]
-        external_plugin_names.append(mainjs.capitalize())
+        exportName = details.get("export", plugin.capitalize())
+        # alias = details.get("alias", plugin)
+        # mainjs = details.get("main", alias)  # Use alias if main is not provided
+        # if mainjs.endswith(".js"):
+        #     mainjs = mainjs[:-3]
+        external_plugin_names.append(exportName)
 
     plugin_name_list = ", ".join(builtin_plugin_names + external_plugin_names)
     

@@ -75,7 +75,8 @@ Additionally, the `alias` and `main` fields can be used to specify a different n
         "plugin2-name": {
           "version": "1.0.4",
           "alias": "npm-plugin-name",
-          "main": "main-file"
+          "main": "main-file",
+          "export": "plugTwo"
         }
       }
     }
@@ -85,13 +86,21 @@ Additionally, the `alias` and `main` fields can be used to specify a different n
 
 - `alias`: Specifies the npm package name if it differs from the plugin name.
 - `main`: Specifies the main JavaScript file name if it differs from the plugin name. The `.js` extension is optional.
+- `export`: Specifies the name of the object created when importing the plugin if different from the plugin name.
 
 RevealPack will automatically cache downloaded plugins in the `directories.source.root` directory in a sub-folder `cached`. These plugins will be copied, unmodified, upon [`build`](build.md) and a reference will be generated with the expected relative reference:
 
 ```html
 <script src="./src/plugin/{alias}/{main}.js"></script>
+<script>
+  Reveal.initialize({
+    ... // other configurations
+    plugins: ["{export || name}"]
+  });
+</script>
+
 ```
-Where `{alias}` and `{main}` are placeholders for the alias and main file name, respectively. If `alias` is not provided, `{plugin}` will be used as the placeholder for the plugin name. Thus, the plugin shall have, e.g., `plugin2-name.js` or `main-file.js` in the unpacked directory. This is a common convention at the time of writing for Reveal.js plugins. Note that the directory unpacked from the url, or npm repo, download will be automatically named `f"{plugin}-{version}"` during the download and setup process.
+Where `{alias}` and `{main}` are placeholders for the alias and main file name, respectively. If `alias` is not provided, `{plugin}` will be used as the placeholder for the plugin name. Thus, the plugin shall have, e.g., `plugin2-name.js` or `main-file.js` in the unpacked directory. This is a common convention at the time of writing for Reveal.js plugins. Note that the directory unpacked from the url, or npm repo, download will be automatically named `f"{plugin}-{version}"` during the download and setup process. The optional `export` parameter specifies to construct the plugin name for Reveal as the value of `export`, otherwise it will use the plugin name. In our example above, we would get: `plugins: ['plugTwo']` in our reveal template file. If not provided, the assumed exported name is the capitalized version of the plugin name, e.g., `"Plugin2-name"` as above.
 
 If needed, the possible extensions for the `url` may be one of: `.zip`, `.tar.gz`, or `.js`. In the `.js` case, the JavaScript file will be downloaded to the cached directory under `f"{plugin}-{version}/{plugin}.js"`.
 
