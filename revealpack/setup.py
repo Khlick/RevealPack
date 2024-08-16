@@ -478,41 +478,6 @@ def create_toc_template():
     logging.info(f"TOC template created at {toc_template_path}")
 
 
-def create_version_file(info, filename='version.txt'):
-    version_content = f"""
-VSVersionInfo(
-  ffi=FixedFileInfo(
-    filevers=(1, 0, 0, 0),
-    prodvers=(1, 0, 0, 0),
-    mask=0x3f,
-    flags=0x0,
-    OS=0x4,
-    fileType=0x1,
-    subtype=0x0,
-    date=(0, 0)
-  ),
-  kids=[
-    StringFileInfo(
-      [
-        StringTable(
-          '040904B0',
-          [StringStruct('FileDescription', '{info["project_title"]}'),
-          StringStruct('FileVersion', '1.0'),
-          StringStruct('InternalName', '{info["project_title"]}'),
-          StringStruct('LegalCopyright', 'Copyright (c) {info["year"]} {", ".join(info["authors"])}'),
-          StringStruct('OriginalFilename', '{info["short_title"]}.exe'),
-          StringStruct('ProductName', '{info["project_title"]}'),
-          StringStruct('ProductVersion', {info['version']})]
-        )
-      ]),
-    VarFileInfo([VarStruct('Translation', [1033, 1200])])
-  ]
-)
-"""
-    with open(filename, 'w') as f:
-        f.write(version_content)
-    logging.info(f"Version Info created in: {filename}")
-
 def main():
     initialize_logging(config)
     create_directories()
@@ -520,7 +485,6 @@ def main():
     update_theme()
     create_reveal_template()
     create_toc_template()
-    create_version_file(config["info"])
     
     # After initialization set force download off
     write_config(args.root,"force_plugin_download",False)

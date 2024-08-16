@@ -12,7 +12,8 @@ Reference the table below for configuration options parsed by the [`revealpack s
 |                          | `version`                    | The current version of your project                                         |
 |                          | `authors`                    | An array containing the names of the authors                                |
 | `directories`            |                              | Configuration for directory structure used in the project                   |
-|                          | `build`                      | Directory where the built presentation will be output (e.g., `dist`)        |
+|                          | `build`                      | Directory where the built presentation will be output (e.g., `build`)       |
+|                          | `package`                    | Directory for distribution of the packaged app (e.g., `dist`)               |
 | `directories.source`     |                              | Root configuration for source directories                                   |
 |                          | `root`                       | Root directory for all source files (e.g., `source`)                        |
 |                          | `presentation_root`          | Directory for storing individual presentation decks (e.g., `decks`)         |
@@ -21,14 +22,14 @@ Reference the table below for configuration options parsed by the [`revealpack s
 |                          | `reveal.js`                  | The version of Reveal.js to be used (e.g., `5.1.0`)                         |
 | `packages.reveal_plugins`|                              | Plugins configuration for Reveal.js                                         |
 |                          | `built_in`                   | List of built-in plugins to include (e.g., `notes`, `highlight`, `math`)    |
-|                          | `external`                   | External plugins with their versions and download URLs                      |
-|                          | `plugin_configurations`      | Specific configurations for each plugin                           |
+|                          | [`external`](#packagesreveal_pluginsexternal) | External plugins with their versions and download URLs     |
+|                          | `plugin_configurations`      | Specific configurations for each plugin                                     |
 | `theme`                  |                              | Path to the custom theme CSS file (e.g., `custom_theme/theme.css`)          |
 | `reveal_template`        |                              | Name of the Jinja2 template file for generating the presentation HTML       |
 | `toc_template`           |                              | Path to the Jinja2 template file for generating the table of contents HTML  |
 | `logging`                |                              | Logging level for setup and build processes (e.g., `error`, see [logging docs](https://docs.python.org/3/library/logging.html#levels).) |
 | `highlight_theme`        |                              | Path to the highlight.js theme CSS file (e.g., `custom_theme/hybrid.css`)   |
-| `custom_scripts`         |                              | Array of custom JavaScript files to include in the presentation             |
+| [`custom_scripts`](#custom_scripts) |                   | Array of custom JavaScript files to include in the presentation             |
 | `force_plugin_download`  |                              | Boolean to force re-download of plugins, even if they are already present   |
 | `reveal_configurations`  |                              | Configuration options for Reveal.js (see [Reveal configuration](https://revealjs.com/config/))|
 

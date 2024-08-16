@@ -23,7 +23,8 @@ def generate_config(destination):
             "version": "1.0.0"
         },
         "directories": {
-            "build": "dist",
+            "build": "build",
+            "package": "dist",
             "source": {
                 "root": "source",
                 "presentation_root": "decks",

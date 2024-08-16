@@ -6,13 +6,16 @@ from pathlib import Path
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 import glob
 import argparse
+import shutil
 
 # Import utility functions
 from _utils.file_operations import (
     copy_and_overwrite, 
     copy_file_if_different,
     get_theme_path,
-    cleanup_temp_files
+    cleanup_temp_files,
+    parse_delimited_file,
+    clean_build_directory
 )
 from _utils.html_operations import beautify_html, compile_scss
 from _utils.config_operations import read_config, initialize_logging
@@ -353,7 +356,7 @@ def copy_reveal():
         logging.info(f"Copying {src_path} to {dest_path}")
         copy_file_if_different(str(src_path), str(dest_path))
 
-def generate_presentation():
+def generate_presentation(decks=None):
     """Generate the final presentation HTML."""
     logging.info("Generating presentations...")
 
@@ -383,6 +386,10 @@ def generate_presentation():
 
     # Loop through each presentation folder
     for presentation_folder in os.listdir(presentation_root):
+        # Skip decks not specified in the list (if provided)
+        if decks and presentation_folder not in decks:
+            continue
+
         presentation_path = os.path.join(presentation_root, presentation_folder)
 
         # Check if it's a directory
@@ -457,6 +464,7 @@ def generate_presentation():
             }
         )
         logging.info(f"Presentation {presentation_folder} generated successfully.")
+
     # Generate the TOC
     generate_toc(
         presentations_for_toc,
@@ -508,17 +516,53 @@ def generate_toc(presentations, template, target):
 
     logging.info(f"Generated TOC and saved at {target_path}")
 
+def get_build_decks(config, decks=None):
+    if not decks:
+        return None
+
+    # Define the presentation root
+    presentation_root = os.path.join(
+        config["directories"]["source"]["root"],
+        config["directories"]["source"]["presentation_root"],
+    )
+
+    # Initialize the list to return
+    deck_list = []
+
+    # Check if 'decks' is a path to a file or a comma-separated string
+    if os.path.isfile(decks):
+        deck_list = parse_delimited_file(decks)
+    else:
+        # If it's a comma-separated string
+        deck_list = [deck.strip() for deck in decks.split(',') if deck.strip()]
+
+    # Filter out directories not present in the presentation root
+    valid_decks = [deck for deck in deck_list if os.path.isdir(os.path.join(presentation_root, deck))]
+
+    if not valid_decks:
+        raise ValueError("No valid directories found in the specified decks.")
+
+    return valid_decks
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Setup Reveal.js presentation environment.')
     parser.add_argument('--root', type=str, default=os.getcwd(), help='Target directory for setup')
+    parser.add_argument('--clean', action='store_true', help='Perform a clean build')
+    parser.add_argument('--decks', type=str, default=None, help='Comma-separated list of decks or a path to a file with deck names')
     args = parser.parse_args()
 
     config = read_config(args.root)
-
+    
     # Initialize jogger for tracking errors/success
     initialize_logging(config)
+    
+    # Handle clean build
+    if args.clean:
+        clean_build_directory(config)
 
+    # Determine decks to build
+    decks_to_build = get_build_decks(config,args.decks)
+    
     # Initialize Jinja2 environment
     env = Environment(loader=FileSystemLoader("."))
 
@@ -538,4 +582,4 @@ if __name__ == "__main__":
     copy_reveal()
 
     # Step 6: Generate presentation
-    generate_presentation()
+    generate_presentation(decks=decks_to_build)

@@ -2,6 +2,14 @@
 
 A CLI tool for managing Reveal.js presentation packages.
 
+## Installation
+
+[RevealPack](https://pypi.org/project/RevealPack) is available on pypi.org. To install the latest stable version, in your active Python 3.9+ environment, use:
+
+```terminal
+pip install RevealPack
+```
+
 ## Commands
 
 - `revealpack init [--destination PATH]`: Initialize the file structure and copy `config.json` and `assets/styles` to the specified destination.

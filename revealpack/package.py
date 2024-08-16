@@ -267,36 +267,62 @@ jobs:
 def main():
     parser = argparse.ArgumentParser(description='Package Reveal.js presentations into a distributable format.')
     parser.add_argument('-r', '--root', type=str, default=os.getcwd(), help='Root directory for packaging')
-    parser.add_argument('-d', '--dest-dir', type=str, required=True, help='Directory to create the package')
-    parser.add_argument('-n','--no-build', action='store_true', help='Skip the build step')
+    parser.add_argument('-t', '--target-dir', type=str, default=None, help='Directory to create the package')
+    parser.add_argument('-n', '--no-build', action='store_true', help='Skip the build step')
+    parser.add_argument('-c', '--clean', action='store_true', help='Perform a clean build before packaging')
+    parser.add_argument('-d', '--decks', type=str, help='Specify decks to build (comma-separated values or a file path)')
     args = parser.parse_args()
 
+    # Load config and initialize logging
     config = read_config(args.root)
     initialize_logging(config)
 
+    # Handle target-dir
+    if args.target_dir is None:
+        args.target_dir = config["directories"].get("package", os.path.join(args.root, 'target'))
+    
+    if not os.path.exists(args.target_dir):
+        os.makedirs(args.target_dir,exist_ok=True)
+        logging.info(f"Created target directory: {args.target_dir}")
+    else:
+        logging.info(f"Using existing target directory: {args.target_dir}")
+
+    # Run build step if not skipped
     if not args.no_build:
         build_script = os.path.join(os.path.dirname(__file__), 'build.py')
         python_executable = sys.executable
+        build_cmd = [python_executable, build_script, '--root', args.root]
+        
+        if args.clean:
+            build_cmd.append('--clean')
+        
+        if args.decks:
+            build_cmd.extend(['--decks', args.decks])
+
         try:
-            subprocess.run([python_executable, build_script, '--root', args.root], check=True)
+            subprocess.run(build_cmd, check=True)
+            logging.info("Build completed successfully.")
         except subprocess.CalledProcessError as e:
             logging.error(f"An error occurred during build: {e}")
             sys.exit(1)
 
+    # Copy the build output to the target directory
     build_src_dir = config["directories"]["build"]
-    target_src_dir = os.path.join(args.dest_dir, 'src')
+    target_src_dir = os.path.join(args.target_dir, 'src')
 
     if os.path.exists(target_src_dir):
         shutil.rmtree(target_src_dir)
+        logging.info(f"Removed existing directory: {target_src_dir}")
+    
     shutil.copytree(build_src_dir, target_src_dir)
-
     logging.info(f"Copied {build_src_dir} to {target_src_dir}")
 
-    create_package_json(config, args.dest_dir)
-    create_ins_config_mac(config, args.dest_dir)
-    create_ins_config_win(config, args.dest_dir)
-    create_gitignore(args.dest_dir)
-    create_github_workflow(config, args.dest_dir)
+    # Create necessary package files
+    create_package_json(config, args.target_dir)
+    create_ins_config_mac(config, args.target_dir)
+    create_ins_config_win(config, args.target_dir)
+    create_gitignore(args.target_dir)
+    create_github_workflow(config, args.target_dir)
 
 if __name__ == "__main__":
     main()

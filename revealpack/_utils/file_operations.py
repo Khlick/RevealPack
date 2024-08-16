@@ -3,6 +3,7 @@ import shutil
 import filecmp
 import logging
 import fnmatch
+import csv
 from pathlib import Path
 
 ignore = ["*.DS_Store", "*.ffs_db", "__pycache__"]
@@ -58,7 +59,7 @@ def copy_file_if_different(src, dest, copied_files=[]):
         logging.info(f"Copying file {dest}.")
     copied_files.append(dest)
 
-def get_theme_path(config):
+def get_theme_path(config) -> str:
     """Locate theme specified in config.json."""
     theme_name = config["theme"]
     theme_path = Path(theme_name)
@@ -123,3 +124,53 @@ def cleanup_temp_files(files_list):
                 break  # Exit the loop if the directory doesn't exist
             
             parent_dir = os.path.dirname(parent_dir)
+
+def get_delimiter_from_file(file_path: str) -> str:
+    try:
+        with open(file_path, 'r') as csvfile:
+            # Read a portion of the file to determine the delimiter
+            content = csvfile.read()
+            delimiter = str(csv.Sniffer().sniff(content).delimiter)
+            logging.info(f"Delimiter '{delimiter}' detected in file '{file_path}'.")
+            return delimiter
+    except FileNotFoundError:
+        logging.error(f"File not found: {file_path}")
+        raise
+    except csv.Error as e:
+        logging.error(f"Error detecting delimiter in file '{file_path}': {e}")
+        raise
+    except Exception as e:
+        logging.error(f"Unexpected error while processing file '{file_path}': {e}")
+        raise
+
+def parse_delimited_file(file_path: str) -> list:
+    """Reads a file and returns a list of values based on the detected delimiter."""
+    delimiter = get_delimiter_from_file(file_path)
+    value_list = []
+    try:
+        with open(file_path, 'r') as csvfile:
+            reader = csv.reader(csvfile, delimiter=delimiter)
+            for row in reader:
+                # Extend the value_list
+                value_list.extend([value.strip() for value in row if value.strip()])
+        logging.info(f"Successfully parsed {len(value_list)} element(s) from file '{file_path}'.")
+    except FileNotFoundError:
+        logging.error(f"File not found: {file_path}")
+        raise
+    except Exception as e:
+        logging.error(f"Failed to parse file '{file_path}': {e}")
+        raise
+    return value_list
+
+def clean_build_directory(config):
+    build_dir = config['directories']['build']
+    if os.path.exists(build_dir):
+        for file in os.listdir(build_dir):
+            file_path = os.path.join(build_dir, file)
+            try:
+                if os.path.isfile(file_path) or os.path.islink(file_path):
+                    os.unlink(file_path)
+                elif os.path.isdir(file_path):
+                    shutil.rmtree(file_path)
+            except Exception as e:
+                logging.error(f'Failed to delete {file_path}. Reason: {e}')

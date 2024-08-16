@@ -45,12 +45,26 @@ def setup(args, root):
 @cli.command()
 @click.argument('args', nargs=-1)
 @click.option('-r', '--root', default=os.getcwd(), help='Root directory for build')
-def build(args, root):
+@click.option('-c', '--clean', is_flag=True, help='Perform a clean build')
+@click.option('-d', '--decks', type=click.Path(exists=True, dir_okay=False, readable=True), help='Specify decks to build (comma-separated values or a file path)')
+def build(args, root, clean, decks):
     """Build the presentation package."""
+
     build_script = os.path.join(os.path.dirname(__file__), 'build.py')
     python_executable = sys.executable
+    build_args = ['--root', root] + list(args)
+
+    # Handle clean build
+    if clean or decks:
+        build_args.append('--clean')
+
+    # Handle deck specification
+    if decks:
+        build_args.append('--decks')
+        build_args.append(decks)
+
     try:
-        subprocess.run([python_executable, build_script, '--root', root] + list(args), check=True)
+        subprocess.run([python_executable, build_script] + build_args, check=True)
     except subprocess.CalledProcessError as e:
         print(f"An error occurred during build: {e}")
 
@@ -68,20 +82,34 @@ def serve(args, root):
 
 @cli.command()
 @click.argument('args', nargs=-1)
-@click.option('-r','--root', default=os.getcwd(), help='Root directory for package')
-@click.option('-d','--dest-dir', required=True, help='Directory to create the package')
-@click.option('-n','--no-build', is_flag=True, help='Skip the build step')
-def package(args, root, dest_dir, no_build):
+@click.option('-r', '--root', default=os.getcwd(), help='Root directory for package')
+@click.option('-t', '--target-dir', default=None, help='Directory to create the package')
+@click.option('-n', '--no-build', is_flag=True, help='Skip the build step')
+@click.option('-c', '--clean', is_flag=True, help='Perform a clean build before packaging')
+@click.option('-d','--decks', type=click.Path(exists=True, dir_okay=False, readable=True), help='Specify decks to build (comma-separated values or a file path)')
+def package(args, root, target_dir, no_build, clean, decks):
     """Package the presentation into a distributable format."""
     package_script = os.path.join(os.path.dirname(__file__), 'package.py')
     python_executable = sys.executable
     try:
-        cmd = [python_executable, package_script, '--root', root, '--dest-dir', dest_dir]
+        cmd = [python_executable, package_script, '--root', root]
+        
+        if target_dir is not None:
+            cmd.extend(['--target-dir', target_dir])
+        
         if no_build:
             cmd.append('--no-build')
+        
+        if clean or decks:
+            cmd.append('--clean')
+        
+        if decks:
+            cmd.extend(['--decks', decks])
+        
         subprocess.run(cmd + list(args), check=True)
     except subprocess.CalledProcessError as e:
         print(f"An error occurred during packaging: {e}")
+
 
 @cli.command()
 def docs():
