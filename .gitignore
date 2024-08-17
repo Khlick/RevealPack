@@ -94,7 +94,7 @@ dmypy.json
 *.bak
 *.tmp
 *.log
-*.lock
+# *.lock
 
 # Specific files
 config.json
