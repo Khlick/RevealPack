@@ -3,7 +3,7 @@ name: Create RevealPack Release From Tag
 on:
   push:
     tags:
-      - 'v*.*.*' 
+      - 'v*.*.*'
 
 permissions:
   contents: write
@@ -25,18 +25,26 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: Install Poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+          export PATH="$HOME/.local/bin:$PATH"
+
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        run: poetry install
+
+      - name: Generate mkdocs.yml
+        run: poetry run python ./generate_mkdocs_yml.py
 
       - name: Build Docs
-        run: mkdocs build
-        
+        run: poetry run mkdocs build
+
       - name: Build the package
-        run: python -m build
+        run: poetry build
 
       - name: Check the built package
-        run: twine check dist/*
-      
+        run: poetry run twine check dist/*
+
       - name: List built package contents
         run: tar -tzf dist/*.tar.gz
 
