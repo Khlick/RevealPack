@@ -5,32 +5,40 @@ The `build` command is responsible for converting slide decks located in the spe
 #### Options
 
 - `--root <directory>`: Specifies the root directory for the build. Defaults to the current working directory.
+- `--clean`: Performs a clean build by removing all contents of the build directory before starting the build process.
+- `--decks <file or string>`: Specifies a comma-separated list of deck names or a path to a file containing deck names to be built. If this option is provided, a clean build is automatically performed.
 
 #### Process Overview
 
 1. **Read and Parse Configuration:**
    The `build` command reads the configuration options from the `config.json` file located in the specified root directory.
 
-2. **Copy Libraries:**
+2. **Perform Clean Build (Optional):**
+   If the `--clean` option is used, the build directory is emptied before the build process begins, ensuring no residual files from previous builds.
+
+3. **Determine Decks to Build (Optional):**
+   If the `--decks` option is provided, only the specified decks are built. The option accepts either a comma-separated string of deck names or a file path containing deck names.
+
+4. **Copy Libraries:**
    The `build` command copies libraries from the source libraries directory to the build directory, ensuring all necessary assets are included.
 
-3. **Copy Custom Scripts:**
+5. **Copy Custom Scripts:**
    Custom scripts specified in the `config.json` are copied to the appropriate location in the build directory.
 
-4. **Copy Plugins:**
+6. **Copy Plugins:**
    Both built-in and external plugins specified in the `config.json` are copied from the cached directory to the build directory.
 
-5. **Compile Theme:**
+7. **Compile Theme:**
    If the specified theme is provided as an SCSS/SASS file, it is compiled into a CSS file. If a pre-compiled CSS file is provided, it is used directly.
 
-6. **Copy Reveal.js Files:**
+8. **Copy Reveal.js Files:**
    Relevant Reveal.js files are copied from the cached directory to the build directory, ensuring the necessary JavaScript and CSS files are available for the presentations.
 
-7. **Generate Presentations:**
+9. **Generate Presentations:**
    The `build` command processes each subdirectory within the presentation root directory, treating each as a separate presentation. It reads any `presentation.json` files for metadata or defaults to parsing HTML files alphabetically.
 
-8. **Generate Table of Contents (TOC):**
-   A table of contents (`index.html`) is generated in the build directory, providing links to all built presentations.
+10. **Generate Table of Contents (TOC):**
+    A table of contents (`index.html`) is generated in the build directory, providing links to all built presentations.
 
 #### Expected Behavior
 
@@ -48,11 +56,11 @@ The `build` command is responsible for converting slide decks located in the spe
 
 #### Example Usage
 
-```sh
-revealpack build --root /path/to/project
-```
+~sh
+revealpack build --root /path/to/project --clean --decks "Lecture 01,Lecture 02"
+~
 
-This command will read the `config.json` from `/path/to/project`, process the slide decks in the presentation root directory, copy necessary libraries and plugins, compile the theme, and generate the final HTML files in the build directory.
+This command will read the `config.json` from `/path/to/project`, perform a clean build, process only the specified decks ("Lecture 01" and "Lecture 02"), copy necessary libraries and plugins, compile the theme, and generate the final HTML files in the build directory.
 
 ### `config.json` Options
 

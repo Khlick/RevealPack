@@ -1,4 +1,4 @@
-# RevealPack Documentation
+# RevealPack Documentation v{{ extra.version }}
 
 Welcome to the RevealPack documentation. RevealPack is a command-line interface (CLI) tool for managing and building multiple Reveal.js presentations.
 
@@ -65,6 +65,15 @@ revealpack setup
 revealpack build
 ```
 
+  The `revealpack build` command converts slide decks located in the specified source directories into individual presentations, handling everything from copying necessary libraries to compiling themes and generating HTML files. This command processes each subdirectory within the presentation root directory, creating a presentation for each.
+
+  **Options**:
+  - `--root <directory>`: Specifies the root directory for the build. Defaults to the current working directory.
+  - `--clean`: Performs a clean build by removing all contents of the build directory before starting the build process.
+  - `--decks <file or string>`: Specifies a comma-separated list of deck names or a path to a file containing deck names to be built. If this option is provided, a clean build is automatically performed.
+
+  The build process includes injecting custom styles and scripts, compiling SCSS/SASS themes, managing plugins, and generating a table of contents for the presentations. It ensures that all necessary files are included and properly configured, resulting in fully functional Reveal.js presentations.
+
 - **Serve Presentations Locally**: Use `revealpack serve` to start a local server with live reloading for development.
 
 ```bash
@@ -74,17 +83,24 @@ revealpack serve
 - **Package Presentations for Distribution**: Use `revealpack package` to package your presentations into a distributable format.
 
 ```bash
-revealpack package --dest-dir <build_directory> [--root <root_directory>] [--no-build]
+revealpack package --target-dir <build_directory> [--root <root_directory>] [--no-build] [--clean] [--decks <file_or_string>]
 ```
 
-  - `--dest-dir`: Required. Directory to create the package.
-  - `--root`: Optional. Root directory for the package (default is the current working directory).
-  - `--no-build`: Optional. Skip the build step (default is to run `revealpack build` before packaging).
+  The `revealpack package` command prepares your presentations for distribution by copying the built files to a specified destination directory and setting up the necessary project files, including `package.json`, installer configurations for macOS and Windows, and other required assets.
+
+  **Options**:
+  - `--root <directory>`: Specifies the root directory for packaging. Defaults to the current working directory.
+  - `--target-dir <directory>`: Specifies the directory where the package will be created. Defaults to the directory specified in `config.json` under `directories.package` or `package_output` if not set.
+  - `--no-build`: Skips the build step. This is useful if the build has already been done and you only want to package the results.
+  - `--clean`: Performs a clean build before packaging. This ensures that only fresh files are included in the package.
+  - `--decks <file or string>`: Specifies a comma-separated list of deck names or a path to a file containing deck names to be built and included in the package. If this option is provided, a clean build is automatically performed.
+
+  The packaging process includes generating a `package.json` file, setting up installer configurations for both macOS and Windows, and creating a `.gitignore` file and a GitHub Actions workflow to automate the build and release process. This ensures that your presentations are ready to be packaged into standalone applications.
 
 For example, to package your presentations without rebuilding, you would run:
 
 ```bash
-revealpack package --dest-dir path/to/new/package --no-build
+revealpack package --target-dir path/to/new/package --no-build
 ```
 
 ## Development

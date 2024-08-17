@@ -1,7 +1,3 @@
-# Read the Docs configuration file for MkDocs projects
-# See https://docs.readthedocs.io/en/stable/config-file/v2.html for details
-
-# Required
 version: 2
 
 # Set the version of Python and other tools you might need
@@ -10,9 +6,13 @@ build:
   tools:
     python: "3.12"
 
+# Build the MkDocs documentation using the specified configuration file
 mkdocs:
   configuration: mkdocs.yml
 
+# Install Python dependencies
 python:
   install:
-  - requirements: docs/requirements.txt
+    - requirements: docs/requirements.txt
+    - method: pip
+      path: .

@@ -1,112 +1,108 @@
-# RevealPack
+# RevealPack Documentation
 
-A CLI tool for managing Reveal.js presentation packages.
+Welcome to the RevealPack documentation. RevealPack is a command-line interface (CLI) tool for managing and building multiple Reveal.js presentations.
 
-## Installation
+## Motivation
 
-[RevealPack](https://pypi.org/project/RevealPack) is available on pypi.org. To install the latest stable version, in your active Python 3.9+ environment, use:
+RevealPack is more than just a Reveal.js presentation starter; it's a comprehensive framework for creating suites of presentations that share themes and resources, such as a lecture series or a multi-day seminar. RevealPack abstracts much of the slide deck creation process, allowing for complete control over individual slides or groups of slides within each presentation. 
 
-```terminal
-pip install RevealPack
-```
+With RevealPack, you can:
+- Create slides individually or group multiple slides in one file.
+- Share raw HTML or Markdown slides with others.
+- Create section title slides or decorate the `section` tag with YAML headers.
+- Serve your presentation during development with live updating for smart automatic rebuilds of changed files.
 
 ## Commands
 
-- `revealpack init [--destination PATH]`: Initialize the file structure and copy `config.json` and `assets/styles` to the specified destination.
-- `revealpack setup`: Setup the environment for building presentations.
-- `revealpack build`: Build the presentation package.
-- `revealpack serve`: Serve the presentation for live editing.
-- `revealpack package`: Package the presentation as an executable.
+- [`init`](init.md): Initialize the directory structure.
+- [`setup`](setup.md): Set up the environment.
+- [`build`](build.md): Build the presentations.
+- [`serve`](serve.md): Serve the presentations locally.
+- [`package`](package.md): Package the presentation for distribution.
+- `docs`: View the documentation.
 
-## Usage
+## Installation
 
-1. **Initialize the Project**:
-    ```
-    revealpack init --destination /path/to/your/project
-    ```
+### Requirements
 
-    This command creates the necessary directory structure and copies the initial configuration and styles files to the specified destination.
+- Python >3.9, (>=3.12 recommended)
 
-2. **Setup the Environment**:
-    ```
-    revealpack setup
-    ```
+### Install RevealPack from PyPI
 
-    This command sets up the environment for building Reveal.js presentations. It reads the `config.json` file, creates necessary directories, downloads and installs Reveal.js packages, checks the theme, and generates the necessary templates for the build step.
+To install RevealPack, run:
 
-3. **Build the Presentation**:
-    ```
-    revealpack build
-    ```
-
-    This command builds the presentation package. It compiles the styles, processes the slide files, and generates the final HTML files in the build directory.
-
-4. **Serve the Presentation**:
-    ```
-    revealpack serve
-    ```
-
-    This command starts a live server for the current presentations, allowing for real-time editing and viewing.
-
-5. **Package the Presentation**:
-    ```
-    revealpack package
-    ```
-
-    This command packages the presentation as an executable for distribution.
-
-## Configuration
-
-The main configuration file is `config.json`. Here are some key configuration options:
-
-- `info`: Information about the project (e.g., title, version, authors).
-- `directories`: Configuration for directory structure used in the project.
-- `packages`: Configuration for Reveal.js and associated plugins.
-- `theme`: Path to the custom theme CSS file.
-- `reveal_template`: Name of the Jinja2 template file for generating the presentation HTML.
-- `toc_template`: Path to the Jinja2 template file for generating the table of contents HTML.
-- `logging`: Logging level for setup and build processes.
-- `highlight_theme`: Path to the highlight.js theme CSS file.
-- `custom_scripts`: Array of custom JavaScript files to include in the presentation.
-- `force_plugin_download`: Boolean to force re-download of plugins.
-- `reveal_configurations`: Configuration options for Reveal.js.
-
-## Dependencies
-
-Ensure you have the necessary dependencies installed. These are listed in the `requirements.txt` file. You can install them using:
-
-```
-pip install -r requirements.txt
+```bash
+pip install revealpack
 ```
 
-## Directory Structure
+_Note: Use the appropriate method for your setup, e.g., `pip3` or `python -m pip...`._
 
-Here is an example of the directory structure after running `revealpack init` and `revealpack setup`:
+## Workflow
 
-```
-your-project-directory/
-├── config.json
-├── assets/
-│   └── styles/
-│       ├── revealpack.scss
-│       └── ... (other styles)
-├── source/
-│   ├── lib/
-│   │   └── ... (libraries and assets)
-│   ├── decks/
-│   │   └── your-presentation/
-│   │       ├── slide1.html
-│   │       ├── slide2.html
-│   │       ├── ...
-│   │       └── presentation.json
-│   ├── cached/
-│   │   └── ... (cached packages)
-│   ├── reveal_template.html
-│   └── toc_template.html
-└── dist/
-    └── ... (build output)
+### Initial Setup
+
+1. **Choose a Project Directory**: Select a directory for your project. It is recommended to create a Python virtual environment in your chosen directory (`root`) and install RevealPack there, rather than using a global environment.
+
+2. **Initialize the Project**: Navigate your terminal or command window to the root directory, activate your Python 3 environment, and use the `revealpack init` command to initialize the directory for your presentations.
+
+```bash
+revealpack init
 ```
 
-## Documentation
+3. **Modify Configuration**: Customize the `config.json` file for your project.
 
-For more detailed documentation on configuration options, slide options, and more, refer to `revealpack docs`.
+4. **Setup Development Environment**: Set up the presentation development environment with the `revealpack setup` command.
+
+```bash
+revealpack setup
+```
+
+### Presentation Development Workflow
+
+- **Build Presentations**: Use `revealpack build` to compile your presentations.
+
+```bash
+revealpack build
+```
+
+  The `revealpack build` command converts slide decks located in the specified source directories into individual presentations, handling everything from copying necessary libraries to compiling themes and generating HTML files. This command processes each subdirectory within the presentation root directory, creating a presentation for each.
+
+  **Options**:
+  - `--root <directory>`: Specifies the root directory for the build. Defaults to the current working directory.
+  - `--clean`: Performs a clean build by removing all contents of the build directory before starting the build process.
+  - `--decks <file or string>`: Specifies a comma-separated list of deck names or a path to a file containing deck names to be built. If this option is provided, a clean build is automatically performed.
+
+  The build process includes injecting custom styles and scripts, compiling SCSS/SASS themes, managing plugins, and generating a table of contents for the presentations. It ensures that all necessary files are included and properly configured, resulting in fully functional Reveal.js presentations.
+
+- **Serve Presentations Locally**: Use `revealpack serve` to start a local server with live reloading for development.
+
+```bash
+revealpack serve
+```
+
+- **Package Presentations for Distribution**: Use `revealpack package` to package your presentations into a distributable format.
+
+```bash
+revealpack package --target-dir <build_directory> [--root <root_directory>] [--no-build] [--clean] [--decks <file_or_string>]
+```
+
+  The `revealpack package` command prepares your presentations for distribution by copying the built files to a specified destination directory and setting up the necessary project files, including `package.json`, installer configurations for macOS and Windows, and other required assets.
+
+  **Options**:
+  - `--root <directory>`: Specifies the root directory for packaging. Defaults to the current working directory.
+  - `--target-dir <directory>`: Specifies the directory where the package will be created. Defaults to the directory specified in `config.json` under `directories.package` or `package_output` if not set.
+  - `--no-build`: Skips the build step. This is useful if the build has already been done and you only want to package the results.
+  - `--clean`: Performs a clean build before packaging. This ensures that only fresh files are included in the package.
+  - `--decks <file or string>`: Specifies a comma-separated list of deck names or a path to a file containing deck names to be built and included in the package. If this option is provided, a clean build is automatically performed.
+
+  The packaging process includes generating a `package.json` file, setting up installer configurations for both macOS and Windows, and creating a `.gitignore` file and a GitHub Actions workflow to automate the build and release process. This ensures that your presentations are ready to be packaged into standalone applications.
+
+For example, to package your presentations without rebuilding, you would run:
+
+```bash
+revealpack package --target-dir path/to/new/package --no-build
+```
+
+## Development
+
+For more detailed information on development, see the [Developer's Guide](dev.md).

@@ -10,20 +10,22 @@ The `revealpack package` command copies the built presentation files to a specif
 
 To package your presentations, navigate to your project directory and run:
 
-```
-revealpack package --dest-dir /path/to/package/directory
+```sh
+revealpack package --target-dir /path/to/package/directory
 ```
 
 ### Options
 
-- `--root`: Root directory for packaging. Defaults to the current working directory.
-- `--dest-dir`: Directory to create the package. This is required.
-- `--no-build`: Skip the build step if you have already built the presentation.
+- `--root <directory>`: Specifies the root directory for packaging. Defaults to the current working directory.
+- `--target-dir <directory>`: Specifies the directory where the package will be created. Defaults to the directory specified in `config.json` under `directories.package` or `package_output` if not set.
+- `--no-build`: Skips the build step. This is useful if the build has already been done and you only want to package the results.
+- `--clean`: Performs a clean build before packaging. This ensures that only fresh files are included in the package.
+- `--decks <file or string>`: Specifies a comma-separated list of deck names or a path to a file containing deck names to be built and included in the package. If this option is provided, a clean build is automatically performed.
 
 Example:
 
-```
-revealpack package --root /path/to/project --dest-dir /path/to/package/directory --no-build
+```sh
+revealpack package --root /path/to/project --target-dir /path/to/package/directory --no-build
 ```
 
 ## Configuration
@@ -44,12 +46,13 @@ This section provides general information about your project:
 This section specifies the directory structure used in the project:
 
 - `build`: Directory where the built presentation will be output (e.g., `dist`).
+- `package`: Directory where the packaged files will be output.
 
 ## Packaging Process
 
-The following steps are executed upon running `pacakge` on a presentation project.
+The following steps are executed upon running `revealpack package` on a presentation project.
 
-1. **Build the Presentation**: If the `--no-build` option is not specified, the `build.py` script is executed to build the presentation.
+1. **Build the Presentation**: If the `--no-build` option is not specified, the `build.py` script is executed to build the presentation. This step may include a clean build or the building of specific decks if the respective options are provided.
 
 2. **Copy Build Directory**: The contents of the build directory specified in `config.json` are copied to the `src` subdirectory of the package directory.
 
@@ -65,7 +68,7 @@ The following steps are executed upon running `pacakge` on a presentation projec
 
 ## Notes
 
-- A copy of the rendered presentations in the `config.directories.buil` will be created in a `src` directory specified in the `dest-dir` option.
+- A copy of the rendered presentations in the `config.directories.build` will be created in a `src` directory specified in the `target-dir` option.
 - Ensure that all necessary files and dependencies are correctly specified in your `config.json` before packaging.
 - The packaging process may take some time depending on the size of your presentations and the number of assets you've included in your presentations.
 
