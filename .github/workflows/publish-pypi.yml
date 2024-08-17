@@ -34,7 +34,7 @@ jobs:
         run: poetry install
 
       - name: Generate mkdocs.yml
-        run: poetry run python ./generate_mkdocs_yml.py
+        run: poetry run python generate_mkdocs_yml.py
 
       - name: Build Docs
         run: poetry run mkdocs build
