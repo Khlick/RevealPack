@@ -1,4 +1,4 @@
-# RevealPack Documentation v{{ extra.version }}
+# RevealPack Documentation
 
 Welcome to the RevealPack documentation. RevealPack is a command-line interface (CLI) tool for managing and building multiple Reveal.js presentations.
 

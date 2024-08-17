@@ -39,8 +39,11 @@ site_dir: revealpack/site
 markdown_extensions: 
   - footnotes
 
+plugins:
+  - search
+
 extra:
-  version: 1.0.10
+  version_label: true
   social:
     - icon: fontawesome/brands/github
       link: https://github.com/Khlick/RevealPack
