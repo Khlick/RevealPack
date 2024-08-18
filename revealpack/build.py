@@ -532,15 +532,19 @@ def get_build_decks(config, decks=None):
     # Check if 'decks' is a path to a file or a comma-separated string
     if os.path.isfile(decks):
         deck_list = parse_delimited_file(decks)
+        logging.info(f"  Parsed decks file '${decks}'")
     else:
         # If it's a comma-separated string
         deck_list = [deck.strip() for deck in decks.split(',') if deck.strip()]
+        logging.info("  Parsed decks list string.")
 
     # Filter out directories not present in the presentation root
     valid_decks = [deck for deck in deck_list if os.path.isdir(os.path.join(presentation_root, deck))]
 
     if not valid_decks:
-        raise ValueError("No valid directories found in the specified decks.")
+        msg = "No valid directories found in the specified decks."
+        logging.error(msg)
+        raise ValueError(msg)
 
     return valid_decks
 
@@ -556,8 +560,12 @@ if __name__ == "__main__":
     # Initialize jogger for tracking errors/success
     initialize_logging(config)
     
+    # Log status
+    logging.info(f"Building ${config["info"].get("project_title", config["info"].get("short_title", "RevealPack Presentations"))}")
+    
     # Handle clean build
     if args.clean:
+        logging.info("Performing clean build!")
         clean_build_directory(config)
 
     # Determine decks to build

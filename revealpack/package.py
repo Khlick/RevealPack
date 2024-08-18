@@ -276,10 +276,15 @@ def main():
     # Load config and initialize logging
     config = read_config(args.root)
     initialize_logging(config)
+    
+    # Log status
+    logging.info(f"Packaging ${config["info"].get("project_title", config["info"].get("short_title", "RevealPack Presentations"))}")
 
     # Handle target-dir
     if args.target_dir is None:
+        logging.info("Using project target directory from config.json")
         args.target_dir = config["directories"].get("package", os.path.join(args.root, 'target'))
+        
     
     if not os.path.exists(args.target_dir):
         os.makedirs(args.target_dir,exist_ok=True)
