@@ -1,16 +1,16 @@
 # `revealpack package`
 
-The `revealpack package` command sets up a new project for packaging your presentations into standalone executables using Electron. This command does not perform the actual packaging; instead, it prepares the necessary files and configurations for you to package your presentation using Electron Packager and Electron Installer.
+The `revealpack package` command sets up a new project for packaging your presentations into standalone executables using Electron. This command prepares the necessary files and configurations for you to package your presentation using Electron Packager and Electron Installer. It can be run multiple times to update an existing package or create a new one from scratch.
 
 ## Overview
 
-The `revealpack package` command copies the built presentation files to a specified destination directory and sets up the necessary project files, including `package.json`, installer configurations for both macOS and Windows, and other required assets.
+The `revealpack package` command copies the built presentation files to a specified destination directory and sets up the necessary project files, including `package.json`, installer configurations for both macOS and Windows, and other required assets. If the package already exists, the command updates the version number in `package.json` and cleans the target directory before copying new files.
 
 ## Usage
 
 To package your presentations, navigate to your project directory and run:
 
-```sh
+```
 revealpack package --target-dir /path/to/package/directory
 ```
 
@@ -24,7 +24,7 @@ revealpack package --target-dir /path/to/package/directory
 
 Example:
 
-```sh
+```
 revealpack package --root /path/to/project --target-dir /path/to/package/directory --no-build
 ```
 
@@ -54,17 +54,19 @@ The following steps are executed upon running `revealpack package` on a presenta
 
 1. **Build the Presentation**: If the `--no-build` option is not specified, the `build.py` script is executed to build the presentation. This step may include a clean build or the building of specific decks if the respective options are provided.
 
-2. **Copy Build Directory**: The contents of the build directory specified in `config.json` are copied to the `src` subdirectory of the package directory.
+2. **Clean Target Directory**: If the target directory already exists, the `src` subdirectory is cleaned to ensure that only the fresh build output is included.
 
-3. **Create `package.json`**: A `package.json` file is generated in the package directory. This file includes metadata and scripts for packaging the application using Electron.
+3. **Copy Build Directory**: The contents of the build directory specified in `config.json` are copied to the `src` subdirectory of the package directory.
 
-4. **Create Installer Configurations**:
+4. **Update or Create `package.json`**: If a `package.json` file already exists in the target directory, its version number is updated based on the configuration. If it does not exist, a new `package.json` is created.
+
+5. **Create Installer Configurations**:
     - **macOS**: Generates `ins-config-mac.json` for creating a macOS DMG installer.
     - **Windows**: Generates `ins-config-win.json` for creating a Windows installer.
 
-5. **Create `.gitignore`**: A `.gitignore` file is created in the package directory to exclude unnecessary files from version control.
+6. **Create `.gitignore`**: A `.gitignore` file is created in the package directory to exclude unnecessary files from version control.
 
-6. **Create GitHub Workflow**: A GitHub Actions workflow file is generated to automate the build and release process for the packaged applications.
+7. **Create GitHub Workflow**: A GitHub Actions workflow file is generated to automate the build and release process for the packaged applications.
 
 ## Notes
 

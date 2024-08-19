@@ -17,20 +17,20 @@ def create_package_json(config, dest_dir):
         "main": "main.js",
         "scripts": {
             "start": "electron .",
-            "package-win": f"electron-packager . {package_info.get('short_title','title')} --overwrite --platform=win32 --arch=x64 --icon=assets/icons/win/icon.ico --prune=true --out=release-builds && npm run make-installer-win",
-            "package-mac": f"electron-packager . {package_info.get('short_title','title')} --overwrite --platform=darwin --arch=x64 --icon=assets/icons/mac/icon.icns --prune=true --out=release-builds && npm run make-installer-mac",
+            "package-win": f"electron-packager . {package_info.get('short_title','title')} --platform=win32 --arch=x64 --icon=assets/icons/win/icon.ico --overwrite --out=release-builds && npm run make-installer-win",
+            "package-mac": f"electron-packager . {package_info.get('short_title','title')}--platform=darwin --arch=x64 --icon=assets/icons/mac/icon.icns --overwrite --out=release-builds && npm run make-installer-mac",
             "make-installer-win": f"electron-installer-windows --src release-builds/{package_info.get('short_title','title')}-win32-x64/ --config ins-config-win.json",
             "make-installer-mac": f"electron-installer-dmg --config ins-config-mac.json release-builds/{package_info.get('short_title','title')}-darwin-x64/{package_info.get('short_title','title')}.app {package_info.get('short_title','title')} --out=release-installers",
             "test": "echo \"Error: no test specified\" && exit 1"
         },
         "keywords": [],
-        "author": ", ".join(package_info['authors']),
-        "license": "ISC",
+        "authors": package_info['authors'],
+        "license": "MIT",
         "devDependencies": {
-            "electron": "^31.0.2",
-            "electron-packager": "^18.3.3",
-            "electron-installer-windows": "^3.0.0",
-            "electron-installer-dmg": "^4.0.0"
+            "@electron/packager": "^18.3.3",
+            "electron": "^31.4.0",
+            "electron-installer-dmg": "^5.0.0",
+            "electron-installer-windows": "^3.0.0"
         }
     }
     package_json_path = os.path.join(dest_dir, 'package.json')
@@ -174,7 +174,7 @@ bower_components/
 
 def create_github_workflow(config, dest_dir):
     package_name = sanitize_name(config['info'].get('short_title','project_name'))
-    workflow_content = f"""name: Build and Release Electron App
+    workflow_content = f"""name: Build and Release {package_name}
 
 on:
   push:
@@ -207,7 +207,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20.12.2"
+          node-version: "20"
       - name: Install dependencies
         run: npm install
       - name: Build and package macOS
@@ -232,7 +232,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20.12.2"
+          node-version: "20"
       - name: Install dependencies
         run: npm install
       - name: Extract package version
@@ -241,7 +241,7 @@ jobs:
           echo "VERSION=$version" >> $env:GITHUB_ENV
         shell: pwsh
       - name: Print extracted version
-        run: echo "Extracted version is ${{{{ env.VERSION }}"}}
+        run: echo "Extracted version is ${{{{ env.VERSION }}}}"
         shell: pwsh
       - name: Build and package Windows
         run: npm run package-win
@@ -263,6 +263,122 @@ jobs:
         f.write(workflow_content)
     logging.info(f"Created GitHub workflow file at {workflow_path}")
 
+def create_main_js(dest_dir):
+    main_js_content = """const { app, BrowserWindow } = require('electron');
+const path = require('path');
+
+let mainWindow;
+
+function createWindow() {
+    mainWindow = new BrowserWindow({
+        width: 1920,
+        height: 1080,
+        webPreferences: {
+            nodeIntegration: false,
+            contextIsolation: true
+        }
+    });
+
+    mainWindow.loadFile(path.join(__dirname, 'src', 'index.html'));
+
+    mainWindow.on('closed', () => {
+        mainWindow = null;
+    });
+}
+
+app.whenReady().then(createWindow);
+
+app.on('window-all-closed', () => {
+    if (process.platform !== 'darwin') {
+        app.quit();
+    }
+});
+
+app.on('activate', () => {
+    if (BrowserWindow.getAllWindows().length === 0) {
+        createWindow();
+    }
+});
+"""
+    main_js_path = os.path.join(dest_dir, 'main.js')
+    with open(main_js_path, 'w') as f:
+        f.write(main_js_content)
+    logging.info(f"Created main.js at {main_js_path}")
+
+def create_readme(config,dest_dir):
+    package_name = sanitize_name(config['info'].get('short_title','project_name'))
+    readme_content = f"""# {package_name}
+
+    ---
+
+    See releases for the current version for MacOS and Windows operating systems.
+    """
+    readme_path = os.join(dest_dir,"README.md")
+    with open (readme_path,'w') as f:
+        f.write(readme_content)
+    logging.info(f"Created README.md at {readme_path}")
+
+# Methods for handling argument parsing
+def handle_target_dir(target_dir, config):
+    if target_dir is None:
+        logging.info("Using project target directory from config.json")
+        target_dir = config["directories"].get("package", os.path.join(os.getcwd(), 'target'))
+
+    if not os.path.exists(target_dir):
+        os.makedirs(target_dir, exist_ok=True)
+        logging.info(f"Created target directory: {target_dir}")
+    else:
+        logging.info(f"Using existing target directory: {target_dir}")
+    
+    return target_dir
+
+def run_build_step(root, no_build, clean, decks):
+    if not no_build:
+        build_script = os.path.join(os.path.dirname(__file__), 'build.py')
+        python_executable = sys.executable
+        build_cmd = [python_executable, build_script, '--root', root]
+        
+        if clean:
+            build_cmd.append('--clean')
+        
+        if decks:
+            build_cmd.extend(['--decks', decks])
+
+        try:
+            subprocess.run(build_cmd, check=True)
+            logging.info("Build completed successfully.")
+        except subprocess.CalledProcessError as e:
+            logging.error(f"An error occurred during build: {e}")
+            sys.exit(1)
+
+def copy_build_output(build_src_dir, target_src_dir):
+    # Clean Target Source
+    if os.path.exists(target_src_dir):
+        shutil.rmtree(target_src_dir)
+        logging.info(f"Cleaned existing directory: {target_src_dir}")
+    # Copy from build
+    shutil.copytree(build_src_dir, target_src_dir)
+    logging.info(f"Copied {build_src_dir} to {target_src_dir}")
+
+def update_or_create_package(config, target_dir):
+    package_json_path = os.path.join(target_dir, 'package.json')
+    if os.path.exists(package_json_path):
+        with open(package_json_path, 'r+') as f:
+            existing_package_json = json.load(f)
+            existing_package_json['version'] = config['info'].get('version', existing_package_json['version'])
+            f.seek(0)
+            json.dump(existing_package_json, f, indent=2)
+            f.truncate()
+        logging.info(f"Updated package.json version to {existing_package_json['version']}")
+    else:
+        create_package_json(config, target_dir)
+        logging.info(f"Created package.json at {package_json_path}")
+        # If creating package.json, handle other target creations
+        create_ins_config_mac(config, target_dir)
+        create_ins_config_win(config, target_dir)
+        create_gitignore(target_dir)
+        create_github_workflow(config, target_dir)
+        create_main_js(target_dir)
 
 def main():
     parser = argparse.ArgumentParser(description='Package Reveal.js presentations into a distributable format.')
@@ -278,56 +394,17 @@ def main():
     initialize_logging(config)
     
     # Log status
-    logging.info(f"Packaging ${config["info"].get("project_title", config["info"].get("short_title", "RevealPack Presentations"))}")
+    logging.info(f"Packaging {config['info'].get('project_title', config['info'].get('short_title', 'RevealPack Presentations'))}")
 
-    # Handle target-dir
-    if args.target_dir is None:
-        logging.info("Using project target directory from config.json")
-        args.target_dir = config["directories"].get("package", os.path.join(args.root, 'target'))
-        
-    
-    if not os.path.exists(args.target_dir):
-        os.makedirs(args.target_dir,exist_ok=True)
-        logging.info(f"Created target directory: {args.target_dir}")
-    else:
-        logging.info(f"Using existing target directory: {args.target_dir}")
+    # Build
+    run_build_step(args.root, args.no_build, args.clean, args.decks)
 
-    # Run build step if not skipped
-    if not args.no_build:
-        build_script = os.path.join(os.path.dirname(__file__), 'build.py')
-        python_executable = sys.executable
-        build_cmd = [python_executable, build_script, '--root', args.root]
-        
-        if args.clean:
-            build_cmd.append('--clean')
-        
-        if args.decks:
-            build_cmd.extend(['--decks', args.decks])
-
-        try:
-            subprocess.run(build_cmd, check=True)
-            logging.info("Build completed successfully.")
-        except subprocess.CalledProcessError as e:
-            logging.error(f"An error occurred during build: {e}")
-            sys.exit(1)
-
-    # Copy the build output to the target directory
+    target_dir = handle_target_dir(args.target_dir, config)
+    target_src_dir = os.path.join(target_dir, 'src')
     build_src_dir = config["directories"]["build"]
-    target_src_dir = os.path.join(args.target_dir, 'src')
+    copy_build_output(build_src_dir, target_src_dir)
 
-    if os.path.exists(target_src_dir):
-        shutil.rmtree(target_src_dir)
-        logging.info(f"Removed existing directory: {target_src_dir}")
-    
-    shutil.copytree(build_src_dir, target_src_dir)
-    logging.info(f"Copied {build_src_dir} to {target_src_dir}")
-
-    # Create necessary package files
-    create_package_json(config, args.target_dir)
-    create_ins_config_mac(config, args.target_dir)
-    create_ins_config_win(config, args.target_dir)
-    create_gitignore(args.target_dir)
-    create_github_workflow(config, args.target_dir)
+    update_or_create_package(config, target_dir)
 
 if __name__ == "__main__":
     main()
