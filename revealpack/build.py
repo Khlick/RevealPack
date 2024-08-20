@@ -531,7 +531,7 @@ def get_build_decks(config, decks=None):
     # Check if 'decks' is a path to a file or a comma-separated string
     if os.path.isfile(decks):
         deck_list = parse_delimited_file(decks)
-        logging.info(f"  Parsed decks file '${decks}'")
+        logging.info(f"  Parsed decks file '{decks}'")
     else:
         # If it's a comma-separated string
         deck_list = [deck.strip() for deck in decks.split(',') if deck.strip()]
