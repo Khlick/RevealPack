@@ -71,14 +71,26 @@ def build(args, root, clean, decks):
 @cli.command()
 @click.argument('args', nargs=-1)
 @click.option('-r', '--root', default=os.getcwd(), help='Root directory for serve')
-def serve(args, root):
+@click.option('-n', '--no-build', is_flag=True, help='Skip build and only run the server')
+@click.option('-c', '--clean', is_flag=True, help='Perform a clean build before serving')
+@click.option('-d', '--decks', type=str, help='Specify decks to build (comma-separated values or a file path)')
+def serve(args, root, no_build, clean, decks):
     """Serve the presentation for live editing."""
     serve_script = os.path.join(os.path.dirname(__file__), 'serve.py')
     python_executable = sys.executable
     try:
-        subprocess.run([python_executable, serve_script, '--root', root] + list(args), check=True)
+        cmd = [python_executable, serve_script, '--root', root]
+        if no_build:
+            cmd.append('--no-build')
+        if clean:
+            cmd.append('--clean')
+        if decks:
+            cmd.extend(['--decks', decks])
+        cmd += list(args)
+        subprocess.run(cmd, check=True)
     except subprocess.CalledProcessError as e:
         print(f"An error occurred during serve: {e}")
+
 
 @cli.command()
 @click.argument('args', nargs=-1)

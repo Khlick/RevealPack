@@ -1,10 +1,10 @@
 # `revealpack package`
 
-The `revealpack package` command sets up a new project for packaging your presentations into standalone executables using Electron. This command prepares the necessary files and configurations for you to package your presentation using Electron Packager and Electron Installer. It can be run multiple times to update an existing package or create a new one from scratch.
+The `revealpack package` command sets up a new project for packaging your presentations into standalone executables using Electron. This command prepares the necessary files and configurations for you to package your presentation using Electron Builder. It can be run multiple times to update an existing package or create a new one from scratch.
 
 ## Overview
 
-The `revealpack package` command copies the built presentation files to a specified destination directory and sets up the necessary project files, including `package.json`, installer configurations for both macOS and Windows, and other required assets. If the package already exists, the command updates the version number in `package.json` and cleans the target directory before copying new files.
+The `revealpack package` command copies the built presentation files to a specified destination directory and sets up the necessary project files, including `package.json`, installer configurations for both macOS and Windows, and other required assets. If the package already exists, the command updates relevant metadata (like the version number) in `package.json` and cleans the target directory to ensure that only the latest files are included.
 
 ## Usage
 
@@ -58,11 +58,11 @@ The following steps are executed upon running `revealpack package` on a presenta
 
 3. **Copy Build Directory**: The contents of the build directory specified in `config.json` are copied to the `src` subdirectory of the package directory.
 
-4. **Update or Create `package.json`**: If a `package.json` file already exists in the target directory, its version number is updated based on the configuration. If it does not exist, a new `package.json` is created.
+4. **Update or Create `package.json`**: If a `package.json` file already exists in the target directory, its metadata, such as the version number, is updated based on the configuration. If it does not exist, a new `package.json` is created, including all the necessary information for Electron Builder.
 
-6. **Create `.gitignore`**: A `.gitignore` file is created in the package directory to exclude unnecessary files from version control.
+5. **Create `.gitignore`**: A `.gitignore` file is created in the package directory to exclude unnecessary files from version control.
 
-7. **Create GitHub Workflow**: A GitHub Actions workflow file is generated to automate the build and release process for the packaged applications.
+6. **Create GitHub Workflow**: A GitHub Actions workflow file is generated to automate the build and release process for the packaged applications.
 
 ## Notes
 

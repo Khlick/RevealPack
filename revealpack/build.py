@@ -6,7 +6,6 @@ from pathlib import Path
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 import glob
 import argparse
-import shutil
 
 # Import utility functions
 from _utils.file_operations import (
