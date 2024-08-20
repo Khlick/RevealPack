@@ -10,86 +10,72 @@ from _utils.string_operations import sanitize_name
 
 def create_package_json(config, dest_dir):
     package_info = config['info']
+    package_title = sanitize_name(package_info.get('short_title','project_name'))
     package_json = {
-        "name": package_info.get('short_title','title'),
+        "name": package_title,
         "version": package_info.get('version','1.0.0'),
         "description": package_info.get('project_title',''),
         "main": "main.js",
+        "authors": package_info['authors'],
+        "author": package_info.get("author", str(package_info.get('authors')[0])),
+        "license": "MIT",
         "scripts": {
             "start": "electron .",
-            "package-win": f"electron-packager . {package_info.get('short_title','title')} --platform=win32 --arch=x64 --icon=assets/icons/win/icon.ico --overwrite --out=release-builds && npm run make-installer-win",
-            "package-mac": f"electron-packager . {package_info.get('short_title','title')}--platform=darwin --arch=x64 --icon=assets/icons/mac/icon.icns --overwrite --out=release-builds && npm run make-installer-mac",
-            "make-installer-win": f"electron-installer-windows --src release-builds/{package_info.get('short_title','title')}-win32-x64/ --config ins-config-win.json",
-            "make-installer-mac": f"electron-installer-dmg --config ins-config-mac.json release-builds/{package_info.get('short_title','title')}-darwin-x64/{package_info.get('short_title','title')}.app {package_info.get('short_title','title')} --out=release-installers",
-            "test": "echo \"Error: no test specified\" && exit 1"
+            "package-win": "electron-builder --win",
+            "package-mac": "electron-builder --mac",
+            "test": "echo \"No tests specified\" && exit 1"
         },
-        "keywords": [],
-        "authors": package_info['authors'],
-        "license": "MIT",
+        "keywords": package_info.get('keywords', []),
         "devDependencies": {
-            "@electron/packager": "^18.3.3",
             "electron": "^31.4.0",
-            "electron-installer-dmg": "^5.0.0",
-            "electron-installer-windows": "^3.0.0"
+            "electron-builder": "^24.13.3"
+        },
+        "build": {
+            "appId": f"com.{package_title.lower()}",
+            "productName": package_title,
+            "directories": {
+                "output": "dist"
+            },
+            "files": [
+                "src/**/*",
+                "main.js"
+            ],
+            "win": {
+                "target": [
+                    {
+                    "target": "nsis",
+                    "arch": ["x64", "ia32"]
+                    }
+                ],
+                "icon": "assets/icons/win/icon.ico",
+                "artifactName": f"{package_title}-v${{version}}-win-${{arch}}.exe"
+            },
+            "mac": {
+                "target": [
+                    {
+                    "target": "dmg",
+                    "arch": ["x64", "arm64", "universal"]
+                    }
+                ],
+                "icon": "assets/icons/mac/icon.icns",
+                "minimumSystemVersion": "10.12",
+                "artifactName": f"{package_title}-v${{version}}-mac-${{arch}}.dmg",
+                "hardenedRuntime": true,
+                "gatekeeperAssess": false
+            },
+            "nsis": {
+                "oneClick": false,
+                "allowToChangeInstallationDirectory": true,
+                "createDesktopShortcut": true,
+                "createStartMenuShortcut": true,
+                "shortcutName": package_info.get('project_title',package_title)
+            }
         }
     }
     package_json_path = os.path.join(dest_dir, 'package.json')
     with open(package_json_path, 'w') as f:
         json.dump(package_json, f, indent=2)
     logging.info(f"Created package.json at {package_json_path}")
-
-def create_ins_config_mac(config, dest_dir):
-    package_info = config['info']
-    ins_config_mac = {
-        "title": package_info.get('short_title','title'),
-        "icon": "assets/icons/mac/icon.icns",
-        "overwrite": True,
-        "contents": [
-            {
-                "x": 448,
-                "y": 344,
-                "type": "link",
-                "path": "/Applications"
-            },
-            {
-                "x": 192,
-                "y": 344,
-                "type": "file",
-                "path": f"release-builds/{package_info.get('short_title','title')}-darwin-x64/{package_info.get('short_title','title')}.app"
-            }
-        ],
-        "format": "ULFO",
-        "window": {
-            "size": {
-                "width": 660,
-                "height": 400
-            }
-        }
-    }
-    ins_config_mac_path = os.path.join(dest_dir, 'ins-config-mac.json')
-    with open(ins_config_mac_path, 'w') as f:
-        json.dump(ins_config_mac, f, indent=2)
-    logging.info(f"Created ins-config-mac.json at {ins_config_mac_path}")
-
-def create_ins_config_win(config, dest_dir):
-    package_info = config['info']
-    ins_config_win = {
-        "productName": package_info.get('short_title','title'),
-        "productDescription": package_info.get('project_title',''),
-        "version": package_info.get('version','1.0.0'),
-        "authors": ", ".join(package_info['authors']),
-        "exe": f"{package_info.get('short_title','title')}.exe",
-        "setupIcon": "assets/icons/win/icon.ico",
-        "noMsi": True,
-        "dest": "release-installers/",
-        "setupExe": f"{package_info.get('short_title','title')}Installer.exe",
-        "noShortcut": False,
-        "runAfterFinish": False
-    }
-    ins_config_win_path = os.path.join(dest_dir, 'ins-config-win.json')
-    with open(ins_config_win_path, 'w') as f:
-        json.dump(ins_config_win, f, indent=2)
-    logging.info(f"Created ins-config-win.json at {ins_config_win_path}")
 
 def create_gitignore(dest_dir):
     gitignore_content = """# Node.js dependencies
@@ -199,7 +185,7 @@ jobs:
           draft: false
           prerelease: false
 
-  build-mac:
+    build-mac:
     needs: setup-release
     runs-on: macos-latest
     steps:
@@ -211,18 +197,20 @@ jobs:
       - name: Install dependencies
         run: npm install
       - name: Build and package macOS
-        run: npm run package-mac
-      - name: List output in release-installers
-        run: ls -l release-installers/
-      - name: Upload macOS Installer
-        uses: actions/upload-release-asset@v1.0.2
-        env:
-          GITHUB_TOKEN: ${{{{ secrets.PERSONAL_TOKEN }}}}
+        run: |
+          export GH_TOKEN=${{{{ secrets.GITHUB_TOKEN }}}}
+          npm run package-mac
+      - name: List output in dist directory
+        run: ls -l dist/
+      - name: Upload macOS Installers
+        uses: softprops/action-gh-release@v2
         with:
-          upload_url: ${{{{ needs.setup-release.outputs.upload_url }}}}
-          asset_path: ./release-installers/{package_name}.dmg
-          asset_name: {package_name}.dmg
-          asset_content_type: application/octet-stream
+          files: |
+            ./dist/{package_name}-${{{{ github.ref_name }}}}-mac-x64.dmg
+            ./dist/{package_name}-${{{{ github.ref_name }}}}-mac-arm64.dmg
+            ./dist/{package_name}-${{{{ github.ref_name }}}}-mac-universal.dmg
+        env:
+          GITHUB_TOKEN: ${{{{ secrets.GITHUB_TOKEN }}}}
 
   build-win:
     needs: setup-release
@@ -235,27 +223,21 @@ jobs:
           node-version: "20"
       - name: Install dependencies
         run: npm install
-      - name: Extract package version
-        run: |
-          $version = (Get-Content package.json -Raw | ConvertFrom-Json).version
-          echo "VERSION=$version" >> $env:GITHUB_ENV
-        shell: pwsh
-      - name: Print extracted version
-        run: echo "Extracted version is ${{{{ env.VERSION }}}}"
-        shell: pwsh
       - name: Build and package Windows
-        run: npm run package-win
-      - name: List output in release-installers
-        run: dir release-installers
-      - name: Upload Windows Installer
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{{{ secrets.PERSONAL_TOKEN }}}}
+        run: |
+          $env:GH_TOKEN="${{{{ secrets.GITHUB_TOKEN }}}}"
+          npm run package-win
+        shell: pwsh
+      - name: List output in dist directory
+        run: dir dist
+      - name: Upload Windows Installers
+        uses: softprops/action-gh-release@v2
         with:
-          upload_url: ${{{{ needs.setup-release.outputs.upload_url }}}}
-          asset_path: ./release-installers/{package_name}-${{{{ env.VERSION }}}}-setup.exe
-          asset_name: {package_name}-${{{{ env.VERSION }}}}-setup.exe
-          asset_content_type: application/vnd.microsoft.portable-executable
+          files: |
+            ./dist/{package_name}-${{{{ github.ref_name }}}}-win-x64.exe
+            ./dist/{package_name}-${{{{ github.ref_name }}}}-win-ia32.exe
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 """
     workflow_path = os.path.join(dest_dir, '.github', 'workflows', 'build-and-release.yml')
     os.makedirs(os.path.dirname(workflow_path), exist_ok=True)
@@ -284,6 +266,15 @@ function createWindow() {
     mainWindow.on('closed', () => {
         mainWindow = null;
     });
+
+    // Handle new window creation
+    mainWindow.webContents.on('new-window', (event, url, frameName, disposition, options) => {
+        event.preventDefault(); // Prevent the default behavior of opening the window
+        options.width = mainWindow.getSize()[0]; // Set the width of the new window
+        options.height = mainWindow.getSize()[1]; // Set the height of the new window
+        event.newGuest = new BrowserWindow(options); // Create the new window with the same size as the main window
+        event.newGuest.loadURL(url); // Load the URL in the new window
+    });
 }
 
 app.whenReady().then(createWindow);
@@ -299,6 +290,7 @@ app.on('activate', () => {
         createWindow();
     }
 });
+
 """
     main_js_path = os.path.join(dest_dir, 'main.js')
     with open(main_js_path, 'w') as f:
@@ -374,8 +366,6 @@ def update_or_create_package(config, target_dir):
         create_package_json(config, target_dir)
         logging.info(f"Created package.json at {package_json_path}")
         # If creating package.json, handle other target creations
-        create_ins_config_mac(config, target_dir)
-        create_ins_config_win(config, target_dir)
         create_gitignore(target_dir)
         create_github_workflow(config, target_dir)
         create_main_js(target_dir)

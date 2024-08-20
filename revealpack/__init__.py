@@ -14,13 +14,15 @@ def copy_file_or_directory(src, dest):
 def generate_config(destination):
     config_data = {
         "info": {
+            "author": "Your Name",
             "authors": [
                 "Your Name"
             ],
             "short_title": "Lectures",
             "project_title": "Science Lectures",
             "year": "2024",
-            "version": "1.0.0"
+            "version": "1.0.0",
+            "keywords": []
         },
         "directories": {
             "build": "build",
