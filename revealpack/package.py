@@ -357,15 +357,26 @@ def update_or_create_package(config, target_dir):
     if os.path.exists(package_json_path):
         with open(package_json_path, 'r+') as f:
             existing_package_json = json.load(f)
-            existing_package_json['version'] = config['info'].get('version', existing_package_json['version'])
+            
+            # Update the fields with new values from config, if they exist
+            existing_package_json['version'] = config['info'].get('version', existing_package_json.get('version', '1.0.0'))
+            existing_package_json['description'] = config['info'].get('project_title', existing_package_json.get('description', ''))
+            existing_package_json['name'] = sanitize_name(config['info'].get('short_title', existing_package_json.get('name', 'project_name')))
+            existing_package_json['author'] = config['info'].get("author", str(config['info'].get('authors', [existing_package_json.get('author', '')])[0]))
+            existing_package_json['keywords'] = config['info'].get('keywords', existing_package_json.get('keywords', []))
+            existing_package_json['build']['appId'] = f"com.{existing_package_json['name'].lower()}"
+            existing_package_json['build']['productName'] = existing_package_json['name']
+            existing_package_json['build']['nsis']['shortcutName'] = config['info'].get('project_title', existing_package_json['name'])
+
             f.seek(0)
             json.dump(existing_package_json, f, indent=2)
             f.truncate()
-        logging.info(f"Updated package.json version to {existing_package_json['version']}")
+
+        logging.info(f"Updated package.json at {package_json_path}")
     else:
         create_package_json(config, target_dir)
         logging.info(f"Created package.json at {package_json_path}")
-        # If creating package.json, handle other target creations
+        # Handle other target creations if package.json is newly created
         create_gitignore(target_dir)
         create_github_workflow(config, target_dir)
         create_main_js(target_dir)

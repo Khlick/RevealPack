@@ -60,10 +60,6 @@ The following steps are executed upon running `revealpack package` on a presenta
 
 4. **Update or Create `package.json`**: If a `package.json` file already exists in the target directory, its version number is updated based on the configuration. If it does not exist, a new `package.json` is created.
 
-5. **Create Installer Configurations**:
-    - **macOS**: Generates `ins-config-mac.json` for creating a macOS DMG installer.
-    - **Windows**: Generates `ins-config-win.json` for creating a Windows installer.
-
 6. **Create `.gitignore`**: A `.gitignore` file is created in the package directory to exclude unnecessary files from version control.
 
 7. **Create GitHub Workflow**: A GitHub Actions workflow file is generated to automate the build and release process for the packaged applications.
@@ -74,6 +70,6 @@ The following steps are executed upon running `revealpack package` on a presenta
 - Ensure that all necessary files and dependencies are correctly specified in your `config.json` before packaging.
 - The packaging process may take some time depending on the size of your presentations and the number of assets you've included in your presentations.
 
-For more details on configuring and using Electron Packager after running `revealpack package`, refer to the [Electron Packager documentation](https://www.electronjs.org/docs/tutorial/application-packaging).
+For more details on configuring and using Electron Builder after running `revealpack package`, refer to the [Electron Builder documentation](https://www.electron.build/).
 
 With these steps, you should be able to successfully set up your project for packaging your presentations into standalone applications for Windows and Mac.
