@@ -185,7 +185,7 @@ jobs:
           draft: false
           prerelease: false
 
-    build-mac:
+  build-mac:
     needs: setup-release
     runs-on: macos-latest
     steps:
@@ -377,6 +377,7 @@ def update_or_create_package(config, target_dir):
         create_package_json(config, target_dir)
         logging.info(f"Created package.json at {package_json_path}")
         # Handle other target creations if package.json is newly created
+        create_readme(config,target_dir)
         create_gitignore(target_dir)
         create_github_workflow(config, target_dir)
         create_main_js(target_dir)
