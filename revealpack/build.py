@@ -560,7 +560,7 @@ if __name__ == "__main__":
     initialize_logging(config)
     
     # Log status
-    logging.info(f"Building ${config["info"].get("project_title", config["info"].get("short_title", "RevealPack Presentations"))}")
+    logging.info(f"Building {config["info"].get("project_title", config["info"].get("short_title", "RevealPack Presentations"))}")
     
     # Handle clean build
     if args.clean:

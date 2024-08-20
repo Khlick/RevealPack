@@ -60,14 +60,14 @@ def create_package_json(config, dest_dir):
                 "icon": "assets/icons/mac/icon.icns",
                 "minimumSystemVersion": "10.12",
                 "artifactName": f"{package_title}-v${{version}}-mac-${{arch}}.dmg",
-                "hardenedRuntime": true,
-                "gatekeeperAssess": false
+                "hardenedRuntime": True,
+                "gatekeeperAssess": False
             },
             "nsis": {
-                "oneClick": false,
-                "allowToChangeInstallationDirectory": true,
-                "createDesktopShortcut": true,
-                "createStartMenuShortcut": true,
+                "oneClick": False,
+                "allowToChangeInstallationDirectory": True,
+                "createDesktopShortcut": True,
+                "createStartMenuShortcut": True,
                 "shortcutName": package_info.get('project_title',package_title)
             }
         }
