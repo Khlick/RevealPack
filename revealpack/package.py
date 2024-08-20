@@ -305,7 +305,7 @@ def create_readme(config,dest_dir):
 
     See releases for the current version for MacOS and Windows operating systems.
     """
-    readme_path = os.join(dest_dir,"README.md")
+    readme_path = os.path.join(dest_dir,"README.md")
     with open (readme_path,'w') as f:
         f.write(readme_content)
     logging.info(f"Created README.md at {readme_path}")
