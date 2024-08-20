@@ -178,7 +178,7 @@ jobs:
         id: create_release
         uses: actions/create-release@v1
         env:
-          GITHUB_TOKEN: ${{{{ secrets.PERSONAL_TOKEN }}}}
+          GITHUB_TOKEN: ${{{{ secrets.GITHUB_TOKEN }}}}
         with:
           tag_name: ${{{{ github.ref }}}}
           release_name: Release ${{{{ github.ref_name }}}}
@@ -237,7 +237,7 @@ jobs:
             ./dist/{package_name}-${{{{ github.ref_name }}}}-win-x64.exe
             ./dist/{package_name}-${{{{ github.ref_name }}}}-win-ia32.exe
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{{ secrets.GITHUB_TOKEN }}}
 """
     workflow_path = os.path.join(dest_dir, '.github', 'workflows', 'build-and-release.yml')
     os.makedirs(os.path.dirname(workflow_path), exist_ok=True)
@@ -301,10 +301,10 @@ def create_readme(config,dest_dir):
     package_name = sanitize_name(config['info'].get('short_title','project_name'))
     readme_content = f"""# {package_name}
 
-    ---
+---
 
-    See releases for the current version for MacOS and Windows operating systems.
-    """
+See releases for the current version for MacOS and Windows operating systems.
+"""
     readme_path = os.path.join(dest_dir,"README.md")
     with open (readme_path,'w') as f:
         f.write(readme_content)
