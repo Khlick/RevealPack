@@ -137,11 +137,13 @@ def copy_plugins():
 def copy_and_compile_styles():
     """Copy and compile styles from the assets/styles directory."""
     logging.info("Copying and compiling styles...")
-
-    # Source directory
-    styles_dir = Path(__file__).parent / 'assets' / 'styles'
-    # Reveal theme directory
+    
+    
     source_root = Path(config["directories"]["source"]["root"])
+    
+    # Source directory
+    styles_dir = source_root.parent / 'assets' / 'styles'
+    # Reveal theme directory
     theme_root_in_reveal = source_root / "cached" / "reveal.js" / "css" / "theme" / "source"
     # Destination directory
     target_css = Path(config["directories"]["build"]) / "src" / "css"
