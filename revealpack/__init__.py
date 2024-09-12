@@ -44,7 +44,6 @@ def generate_config(destination):
                 "external": {},
                 "plugin_configurations": {
                     "mathjax3": {
-                        "mathjax": "https://cdn.jsdelivr.net/npm/mathjax@4.0.0-beta.6/tex-mml-chtml.js",
                         "loader": {
                             "load": [
                                 "[tex]/html"
@@ -109,9 +108,9 @@ def generate_config(destination):
             "viewDistance": 3,
             "width": 1920,
             "height": 1080,
-            "margin": 0.125,
+            "margin": 0.081,
             "minScale": 0.1,
-            "maxScale": 1.25
+            "maxScale": 1.56,
         }
     }
 

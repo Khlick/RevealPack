@@ -191,14 +191,29 @@ def create_reveal_template():
     builtin_plugin_names = [
         f"Reveal{plugin.capitalize()}" for plugin in builtin_plugins
     ]
+    
+    # Check if "RevealMath" is in the list
+    if "RevealMath" in builtin_plugin_names:
+        # Extract the plugin configurations from the config
+        plugin_config = config["packages"]["reveal_plugins"].get("plugin_configurations", {})
+
+        # Check which key is present among "mathjax2", "mathjax3", or "katex"
+        if "mathjax2" in plugin_config:
+            replacement = "RevealMath.MathJax2"
+        elif "mathjax3" in plugin_config:
+            replacement = "RevealMath.MathJax3"
+        elif "katex" in plugin_config:
+            replacement = "RevealMath.KaTeX"
+        else:
+            # None of the keys were found; "RevealMath" is sufficient
+            replacement = "RevealMath"
+
+        # Modify the "RevealMath" entry in the builtin_plugin_names array
+        builtin_plugin_names[builtin_plugin_names.index("RevealMath")] = replacement
 
     external_plugin_names = []
     for plugin, details in external_plugins.items():
         exportName = details.get("export", plugin.capitalize())
-        # alias = details.get("alias", plugin)
-        # mainjs = details.get("main", alias)  # Use alias if main is not provided
-        # if mainjs.endswith(".js"):
-        #     mainjs = mainjs[:-3]
         external_plugin_names.append(exportName)
 
     plugin_name_list = ", ".join(builtin_plugin_names + external_plugin_names)
@@ -398,8 +413,8 @@ def create_reveal_template():
         <script>
             Reveal.initialize({{
 { add_offset_to_string(reveal_config_str, 14) }
-              plugins: [{plugin_name_list}],
 { add_offset_to_string(plugin_config_str, 14) }
+            plugins: [{plugin_name_list}]
             }});
         </script>
     </body>
