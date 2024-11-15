@@ -288,8 +288,8 @@ def create_reveal_template():
         <link rel="icon" type="image/x-icon" href="{favicon_path}">
         <link rel="stylesheet" href="./src/css/reset.css">
         <link rel="stylesheet" href="./src/css/reveal.css">
-        <link rel="stylesheet" href="./src/theme/{theme_name}.css" id="theme">
         <link rel="stylesheet" href="./src/css/revealpack.css">
+        <link rel="stylesheet" href="./src/theme/{theme_name}.css" id="theme">
 {add_offset_to_string(highlight_str, 8)}
         <!-- Custom CSS -->
 {add_offset_to_string(custom_css_tags, 8)}
