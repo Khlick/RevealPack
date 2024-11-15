@@ -279,9 +279,10 @@ def create_reveal_template():
     # Create Reveal.js template with Jinja2 placeholders for build.py
     reveal_template = f"""
 <!doctype html>
-<html lang="en">
+<html lang="en-US">
     <head>
         <meta charset="utf-8">
+        <meta name="google" content="notranslate">
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
         <title>{{{{deck.title}}}}</title>
         <link rel="icon" type="image/x-icon" href="{favicon_path}">
@@ -433,9 +434,11 @@ def create_toc_template():
     favicon_path = os.path.join(source_obj.get("libraries","lib"), "favicon.png")
     toc_str = f"""
         <!DOCTYPE html>
-        <html lang="en">
+        <html lang="en-US">
         <head>
             <meta charset="UTF-8">
+            <meta name="google" content="notranslate">
+            
             <title>Table of Contents</title>
             <link rel="icon" type="image/x-icon" href="{favicon_path}">
             <style>
