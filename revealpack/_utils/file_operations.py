@@ -126,12 +126,18 @@ def cleanup_temp_files(files_list):
             parent_dir = os.path.dirname(parent_dir)
 
 def get_delimiter_from_file(file_path: str) -> str:
+    # First check file extension
+    file_extension = Path(file_path).suffix.lower()
+    if file_extension == '.csv':
+        return ','
+    elif file_extension == '.tsv':
+        return '\t'
+    
     try:
         with open(file_path, 'r') as csvfile:
-            # Read a portion of the file to determine the delimiter
+            # If not csv/tsv, try to detect delimiter
             content = csvfile.read()
             delimiter = str(csv.Sniffer().sniff(content).delimiter)
-            logging.info(f"Delimiter '{delimiter}' detected in file '{file_path}'.")
             return delimiter
     except FileNotFoundError:
         logging.error(f"File not found: {file_path}")

@@ -56,9 +56,9 @@ The `build` command is responsible for converting slide decks located in the spe
 
 #### Example Usage
 
-~sh
+```sh
 revealpack build --root /path/to/project --clean --decks "Lecture 01,Lecture 02"
-~
+```
 
 This command will read the `config.json` from `/path/to/project`, perform a clean build, process only the specified decks ("Lecture 01" and "Lecture 02"), copy necessary libraries and plugins, compile the theme, and generate the final HTML files in the build directory.
 
