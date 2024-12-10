@@ -105,4 +105,4 @@ revealpack package --target-dir path/to/new/package --no-build
 
 ## Development
 
-For more detailed information on development, see the [Developer's Guide](dev.md).
+For more detailed information on development, see the [Developer's Guide](https://revealpack.readthedocs.io/en/latest/dev/).

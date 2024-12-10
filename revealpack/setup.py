@@ -338,7 +338,7 @@ def create_reveal_template():
                             {{% if loop.first %}}
                             <h2 class="r-fit-text">{{{{ line|title }}}}</h2>
                             {{% else %}}
-                            <h3>{{{{ line|title }}}}</h3>
+                            <h3>{{{{ line }}}}</h3>
                             {{% endif %}}
                             {{% endfor %}}
                             {{% endif %}}
@@ -433,58 +433,182 @@ def create_toc_template():
     source_obj = config["directories"]["source"]
     favicon_path = os.path.join(source_obj.get("libraries","lib"), "favicon.png")
     toc_str = f"""
-        <!DOCTYPE html>
-        <html lang="en-US">
-        <head>
-            <meta charset="UTF-8">
-            <meta name="google" content="notranslate">
-            
-            <title>Table of Contents</title>
-            <link rel="icon" type="image/x-icon" href="{favicon_path}">
-            <style>
-                body {{
-                    font-family: Arial, sans-serif;
-                    background-color: #f4f4f4;
-                    margin: 0;
-                    padding: 0;
+    <!DOCTYPE html>
+    <html lang="en-US">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="google" content="notranslate">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Table of Contents</title>
+        <link rel="icon" type="image/x-icon" href="{favicon_path}">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+        <style>
+            body {{
+                font-family: Arial, sans-serif;
+                margin: 0;
+                padding: 0;
+                height: 100vh;
+                overflow: hidden;
+            }}
+
+            .topbar {{
+                background-color: #333;
+                color: white;
+                padding: 10px;
+                display: flex;
+                align-items: center;
+                height: 40px;
+            }}
+
+            #menu-toggle {{
+                background: none;
+                border: none;
+                color: white;
+                font-size: 1.5em;
+                cursor: pointer;
+                padding: 0 15px;
+            }}
+
+            .heading {{
+                margin-left: 15px;
+            }}
+
+            .container {{
+                display: flex;
+                height: calc(100vh - 60px);
+            }}
+
+            .sidebar {{
+                background-color: #f4f4f4;
+                width: 300px;
+                overflow-y: auto;
+                transition: transform 0.3s ease;
+                position: absolute;
+                top: 60px;
+                bottom: 0;
+                left: 0;
+                z-index: 100;
+                box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            }}
+
+            .sidebar.closed {{
+                transform: translateX(-300px);
+            }}
+
+            .content {{
+                flex-grow: 1;
+                height: 100%;
+            }}
+
+            #presentation-frame {{
+                width: 100%;
+                height: 100%;
+                border: none;
+            }}
+
+            .toc-item {{
+                padding: 15px;
+                border-bottom: 1px solid #ddd;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                background-color: white;
+            }}
+
+            .toc-item:hover {{
+                background-color: #f8f8f8;
+            }}
+
+            .toc-link {{
+                text-decoration: none;
+                color: #333;
+                flex-grow: 1;
+                margin-right: 10px;
+            }}
+
+            .external-link {{
+                color: #666;
+                font-size: 1.2em;
+            }}
+
+            .external-link:hover {{
+                color: #000;
+            }}
+        </style>
+    </head>
+    <body>
+        <div class="topbar">
+            <button id="menu-toggle"><i class="fas fa-bars"></i></button>
+            <h1 class="heading">{{{{ project_title|title }}}}</h1>
+        </div>
+        <div class="container">
+            <nav class="sidebar">
+                <div class="toc-list">
+                    {{% for presentation in toc_links %}}
+                        <div class="toc-item">
+                            <a href="{{{{ presentation.link|safe }}}}" class="toc-link" data-src="{{{{ presentation.link|safe }}}}">
+                                {{{{ presentation.name|title }}}}{%- if presentation.titlepage -%}: {{{{ presentation.titlepage|title }}}}{% endif %}
+                            </a>
+                            <a href="{{{{ presentation.link|safe }}}}" class="external-link" target="_blank" title="Open in new tab">
+                                <i class="fas fa-external-link-alt"></i>
+                            </a>
+                        </div>
+                    {{% endfor %}}
+                </div>
+            </nav>
+            <main class="content">
+                <iframe id="presentation-frame" title="Presentation Viewer"></iframe>
+            </main>
+        </div>
+
+        <script>
+            const menuToggle = document.getElementById('menu-toggle');
+            const sidebar = document.querySelector('.sidebar');
+            const iframe = document.getElementById('presentation-frame');
+            const tocLinks = document.querySelectorAll('.toc-link');
+
+            // Toggle sidebar
+            menuToggle.addEventListener('click', () => {{
+                sidebar.classList.toggle('closed');
+                reloadIframe();
+            }});
+
+            // Handle presentation links
+            tocLinks.forEach(link => {{
+                link.addEventListener('click', (e) => {{
+                    e.preventDefault();
+                    const src = link.getAttribute('data-src');
+                    iframe.src = src;
+                    
+                    // On mobile or narrow screens, close the sidebar after selection
+                    if (window.innerWidth <= 768) {{
+                        sidebar.classList.add('closed');
+                    }}
+                }});
+            }});
+
+            // Handle window resize
+            let resizeTimer;
+            window.addEventListener('resize', () => {{
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(reloadIframe, 250);
+            }});
+
+            function reloadIframe() {{
+                if (iframe.src) {{
+                    iframe.src = iframe.src;
                 }}
-                h1 {{
-                    background-color: #333;
-                    color: white;
-                    padding: 10px 0;
-                    text-align: center;
-                }}
-                ul#toc-list {{
-                    list-style: none;
-                    padding: 20px;
-                }}
-                ul#toc-list li {{
-                    background-color: #fff;
-                    margin: 8px 0;
-                    padding: 12px;
-                    text-align: center;
-                    border-radius: 4px;
-                    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
-                }}
-                ul#toc-list li a {{
-                    text-decoration: none;
-                    color: #333;
-                    font-weight: bold;
-                }}
-            </style>
-        </head>
-        <body>
-            <h1>Table of Contents</h1>
-            <ul id="toc-list">
-                {{% for presentation in toc_links %}}
-                    <li><a href="{{{{ presentation.link|safe }}}}"  target="_blank">
-                    {{{{ presentation.name|title }}}}{{%- if presentation.titlepage -%}}: {{{{ presentation.titlepage|title }}}}{{% endif %}}
-                    </a></li>
-                {{% endfor %}}
-            </ul>
-        </body>
-        </html>
-        """
+            }}
+
+            // Load first presentation by default
+            if (tocLinks.length > 0) {{
+                const firstLink = tocLinks[0];
+                iframe.src = firstLink.getAttribute('data-src');
+            }}
+        </script>
+    </body>
+    </html>
+    """
     toc_template_content = dedent(toc_str)
 
     toc_template_path = os.path.join(

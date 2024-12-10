@@ -471,10 +471,11 @@ def generate_presentation(decks=None):
         presentations_for_toc,
         os.path.join(config["directories"]["source"]["root"], config["toc_template"]),
         config["directories"]["build"],
+        config["info"].get("project_title", "Table of Contents")
     )
 
 
-def generate_toc(presentations, template, target):
+def generate_toc(presentations, template, target, project_title):
     """
     Generate a Table of Contents (TOC) HTML file based on the given presentations and template.
 
@@ -508,7 +509,7 @@ def generate_toc(presentations, template, target):
     ]
 
     # Render the template
-    rendered_toc = toc_template.render(toc_links=toc_links)
+    rendered_toc = toc_template.render(toc_links=toc_links, project_title=project_title)
 
     # Save the rendered HTML to the target directory
     target_path = os.path.join(target, "index.html")
