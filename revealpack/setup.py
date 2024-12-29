@@ -547,7 +547,7 @@ def create_toc_template():
                     {{% for presentation in toc_links %}}
                         <div class="toc-item">
                             <a href="{{{{ presentation.link|safe }}}}" class="toc-link" data-src="{{{{ presentation.link|safe }}}}">
-                                {{{{ presentation.name|title }}}}{%- if presentation.titlepage -%}: {{{{ presentation.titlepage|title }}}}{% endif %}
+                                {{{{ presentation.name|title }}}}{{%- if presentation.titlepage -%}}: {{{{ presentation.titlepage|title }}}}{{% endif %}}
                             </a>
                             <a href="{{{{ presentation.link|safe }}}}" class="external-link" target="_blank" title="Open in new tab">
                                 <i class="fas fa-external-link-alt"></i>
