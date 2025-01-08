@@ -81,8 +81,8 @@ def get_referenced_files(html_content, libraries_dir):
             
             try:
                 lib_index = path_parts.index(libraries_dir)
-                # Take everything after the libraries_dir
-                relative_parts = path_parts[lib_index + 1:]
+                # Take everything from libraries_dir onwards
+                relative_parts = path_parts[lib_index:]
                 if relative_parts:  # Only process if we have parts after libraries_dir
                     # Join with OS-specific separator
                     relative_path = os.path.join(*relative_parts)
@@ -107,14 +107,9 @@ def copy_libraries(specific_files=None):
     logging.info("Copying libraries...")
 
     # Source and destination directories
-    source_dir = os.path.join(
-        config["directories"]["source"]["root"],
-        config["directories"]["source"]["libraries"]
-    )
-    dest_dir = os.path.join(
-        config["directories"]["build"], 
-        config["directories"]["source"]["libraries"]
-    )
+    source_dir = config["directories"]["source"]["root"]
+    logging.debug(f"Source directory: {source_dir}")
+    dest_dir = str(config["directories"]["build"])
 
     # Check if source directory exists
     if not os.path.exists(source_dir):
@@ -130,9 +125,9 @@ def copy_libraries(specific_files=None):
         # Track indices of missing files
         missing_indices = []
         for i, file in enumerate(files_to_check):
-            file_path = os.path.join(source_dir, file)
-            if not os.path.exists(file_path):
-                logging.info(f"Referenced file not found: {file}")
+            s = os.path.join(source_dir, *[part for part in file.replace('\\', '/').split('/')])
+            if not os.path.exists(s):
+                logging.info(f"Referenced file not found: {s}")
                 missing_indices.append(i)
         
         # Remove missing files in reverse order to maintain correct indices
@@ -143,8 +138,8 @@ def copy_libraries(specific_files=None):
 
     # Copy files
     for item in files_to_check:
-        logging.debug(f"  Copying {item}")
-        s = os.path.join(source_dir, item)
+        s = os.path.join(source_dir, *[part for part in item.replace('\\', '/').split('/')])
+        logging.debug(f"  Copying {s}")
         d = os.path.join(dest_dir, item)
         if os.path.exists(s):
             if os.path.isdir(s):
@@ -545,11 +540,14 @@ def generate_presentation(decks=None):
         logging.info("Slides parsed successfully.")
 
         page_title_str = deck["title"]
+        logging.info(f"Parsing titlepage for '{page_title_str}'...")
         titlepage = deck.get("titlepage")
         if titlepage:
             validate_titlepage(titlepage)
             page_title_str = " ".join(titlepage["headline"]).strip()
             deck["titlepage"] = titlepage
+        
+        deck["title"] = str(page_title_str)    
         
         logging.info(f"Finished parsing '{str(page_title_str)}'.")
 
@@ -559,10 +557,6 @@ def generate_presentation(decks=None):
         
         # Collect file references
         referenced_files = get_referenced_files(rendered_html, libraries_dir)
-        if referenced_files:
-            logging.debug(f"Found referenced files: {', '.join(referenced_files)}")
-        else:
-            logging.debug("No library references found in this presentation")
         all_referenced_files.update(referenced_files)
         
         # Store rendered HTML for later

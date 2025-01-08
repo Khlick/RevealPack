@@ -13,7 +13,10 @@ def copy_and_overwrite(src, dest, copied_files=None):
     """Copy directory from src to dest, overwrite if different. Optionally return a list of copied file paths."""
     if copied_files is None:
         copied_files = []
-
+    if isinstance(src, Path):
+        src = str(src)
+    src = src.replace('\\', '/')
+    
     if not os.path.exists(dest):
         shutil.copytree(src, dest)
         logging.info(f"Copying directory {dest}.")
@@ -42,6 +45,12 @@ def copy_file_if_different(src, dest, copied_files=[]):
     - src (str): Source file path
     - dest (str): Destination file path
     """
+    # Convert src to string path if it's a Path object and normalize path separators
+    if isinstance(src, Path):
+        src = str(src)
+    src = src.replace('\\', '/')
+    # Create parent directory if it doesn't exist
+    os.makedirs(os.path.dirname(dest), exist_ok=True)
     # Check if src file matches any pattern in the ignore list
     src_file_name = os.path.basename(src)
     if any(fnmatch.fnmatch(src_file_name, pattern) for pattern in ignore):
