@@ -70,6 +70,10 @@ def get_referenced_files(html_content, libraries_dir):
         for match in matches:
             # Always use group 1 as it contains the path without quotes/function calls
             path = unquote(match.group(1)).replace('\\', '/')
+            
+            # Remove URL fragments (anything after #)
+            path = path.split('#')[0]
+            
             logging.debug(f"    Found raw path: {path}")
             
             # Split the path into components
