@@ -6,6 +6,9 @@ from pathlib import Path
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 import glob
 import argparse
+import re
+from urllib.parse import unquote
+from html import unescape
 
 # Import utility functions
 from _utils.file_operations import (
@@ -25,17 +28,88 @@ from _utils.presentation_operations import (
 )
 
 
-def copy_libraries():
+def get_referenced_files(html_content, libraries_dir):
+    """Extract file references from HTML content that are in the libraries directory.
+    
+    Args:
+        html_content (str): The rendered HTML content
+        libraries_dir (str): The name of the libraries directory
+        
+    Returns:
+        set: Set of unique file paths referenced in the HTML that are in libraries_dir
+    """
+    # First unescape any HTML entities in the content
+    html_content = unescape(html_content)
+    
+    patterns = [
+        # Standard HTML attributes
+        rf'(?:src|data-src|href)\s*=\s*["\']([^"\']*?{libraries_dir}/[^"\']+)["\']',
+        
+        # Background and other data attributes
+        rf'data-background(?:-image)?\s*=\s*["\']([^"\']*?{libraries_dir}/[^"\']+)["\']',
+        
+        # Any other data-* attributes that might reference library files
+        rf'data-[a-zA-Z-]+\s*=\s*["\']([^"\']*?{libraries_dir}/[^"\']+)["\']',
+        
+        # Same attributes but without quotes (rare but possible)
+        rf'(?:src|data-src|href|data-background(?:-image)?)\s*=\s*([^\s>]*?{libraries_dir}/[^\s>]+)',
+        
+        # CSS url() function with optional quotes
+        rf'url\(["\']?([^"\')\s]*?{libraries_dir}/[^"\')\s]+)["\']?\)',
+        
+        # Any quoted path containing libraries_dir (catch-all for other cases)
+        rf'["\']([^"\']*?{libraries_dir}/[^"\']+)["\']'
+    ]
+    
+    referenced_files = set()
+    logging.debug(f"Libraries directory: {libraries_dir}")
+    
+    for pattern in patterns:
+        logging.debug(f"  Searching with pattern: {pattern}")
+        matches = re.finditer(pattern, html_content, re.IGNORECASE)
+        for match in matches:
+            # Always use group 1 as it contains the path without quotes/function calls
+            path = unquote(match.group(1)).replace('\\', '/')
+            logging.debug(f"    Found raw path: {path}")
+            
+            # Split the path into components
+            path_parts = re.split(r'[/\\]', path)
+            
+            try:
+                lib_index = path_parts.index(libraries_dir)
+                # Take everything after the libraries_dir
+                relative_parts = path_parts[lib_index + 1:]
+                if relative_parts:  # Only process if we have parts after libraries_dir
+                    # Join with OS-specific separator
+                    relative_path = os.path.join(*relative_parts)
+                    logging.debug(f"    Adding relative path: {relative_path}")
+                    referenced_files.add(relative_path)
+            except ValueError:
+                logging.debug(f"    Skipping path: {path} (no {libraries_dir} found)")
+            except Exception as e:
+                logging.debug(f"    Error processing path {path}: {str(e)}")
+    
+    if referenced_files:
+        logging.debug("Found referenced files:")
+        for ref in sorted(referenced_files):
+            logging.debug(f"  - {ref}")
+    else:
+        logging.debug("No library references found")
+                
+    return referenced_files
+
+def copy_libraries(specific_files=None):
     """Copy libraries to the production directory."""
     logging.info("Copying libraries...")
 
     # Source and destination directories
     source_dir = os.path.join(
         config["directories"]["source"]["root"],
-        config["directories"]["source"]["libraries"],
+        config["directories"]["source"]["libraries"]
     )
     dest_dir = os.path.join(
-        config["directories"]["build"], config["directories"]["source"]["libraries"]
+        config["directories"]["build"], 
+        config["directories"]["source"]["libraries"]
     )
 
     # Check if source directory exists
@@ -46,14 +120,35 @@ def copy_libraries():
     # Create destination directory if it doesn't exist
     os.makedirs(dest_dir, exist_ok=True)
 
+    # Determine which files to process
+    if specific_files is not None:
+        files_to_check = list(specific_files)  # Convert to list to allow indexing
+        # Track indices of missing files
+        missing_indices = []
+        for i, file in enumerate(files_to_check):
+            file_path = os.path.join(source_dir, file)
+            if not os.path.exists(file_path):
+                logging.info(f"Referenced file not found: {file}")
+                missing_indices.append(i)
+        
+        # Remove missing files in reverse order to maintain correct indices
+        for idx in reversed(missing_indices):
+            files_to_check.pop(idx)
+    else:
+        files_to_check = os.listdir(source_dir)
+
     # Copy files
-    for item in os.listdir(source_dir):
+    for item in files_to_check:
+        logging.debug(f"  Copying {item}")
         s = os.path.join(source_dir, item)
         d = os.path.join(dest_dir, item)
-        if os.path.isdir(s):
-            copy_and_overwrite(s, d)
+        if os.path.exists(s):
+            if os.path.isdir(s):
+                copy_and_overwrite(s, d)
+            else:
+                copy_file_if_different(s, d)
         else:
-            copy_file_if_different(s, d)
+            logging.info(f"  Could not find source file: {s}")
 
     logging.info("Libraries copied successfully.")
 
@@ -361,6 +456,10 @@ def generate_presentation(decks=None):
     """Generate the final presentation HTML."""
     logging.info("Generating presentations...")
 
+    # Initialize variables for collecting all referenced files
+    all_referenced_files = set()
+    rendered_presentations = []
+
     # Initialize an empty array to collect presentation data for TOC
     presentations_for_toc = []
 
@@ -385,9 +484,11 @@ def generate_presentation(decks=None):
         config["directories"]["source"]["presentation_root"],
     )
 
-    # Loop through each presentation folder
+    # Get libraries directory name for reference checking
+    libraries_dir = config["directories"]["source"]["libraries"]
+
+    # First pass: render all presentations and collect file references
     for presentation_folder in os.listdir(presentation_root):
-        # Skip decks not specified in the list (if provided)
         if decks and presentation_folder not in decks:
             continue
 
@@ -443,28 +544,47 @@ def generate_presentation(decks=None):
         titlepage = deck.get("titlepage")
         if titlepage:
             validate_titlepage(titlepage)
-            page_title_str = titlepage["headline"][0]
+            page_title_str = " ".join(titlepage["headline"]).strip()
             deck["titlepage"] = titlepage
-            logging.info("Finished parsing 'titlepage.")
+        
+        logging.info(f"Finished parsing '{str(page_title_str)}'.")
 
-        # Render the final presentation HTML
+        # Render the HTML
         rendered_html = template.render(deck=deck)
+        logging.debug(f"Rendered HTML for {presentation_folder}, searching for library references...")
+        
+        # Collect file references
+        referenced_files = get_referenced_files(rendered_html, libraries_dir)
+        if referenced_files:
+            logging.debug(f"Found referenced files: {', '.join(referenced_files)}")
+        else:
+            logging.debug("No library references found in this presentation")
+        all_referenced_files.update(referenced_files)
+        
+        # Store rendered HTML for later
+        rendered_presentations.append({
+            'folder': presentation_folder,
+            'html': rendered_html,
+            'deck': deck
+        })
 
-        # Save the rendered HTML to the production directory
-        pres_link = f"{presentation_folder}.html"
+    # Copy libraries with collected file references
+    copy_libraries(all_referenced_files)
+
+    # Second pass: write out all presentations
+    for presentation in rendered_presentations:
+        pres_link = f"{presentation['folder']}.html"
         output_path = os.path.join(config["directories"]["build"], pres_link)
+        
         with open(output_path, "w") as f:
-            f.write(beautify_html(rendered_html, 2))
+            f.write(beautify_html(presentation['html'], 2))
 
-        # Append to presentations_for_toc
-        presentations_for_toc.append(
-            {
-                "id": pres_link,
-                "name": deck["title"],
-                "titlepage": page_title_str,
-            }
-        )
-        logging.info(f"Presentation {presentation_folder} generated successfully.")
+        # Add to TOC data
+        presentations_for_toc.append({
+            "id": pres_link,
+            "name": presentation['deck']["title"],
+            "titlepage": presentation['deck'].get("titlepage", ""),
+        })
 
     # Generate the TOC
     generate_toc(
@@ -555,12 +675,13 @@ if __name__ == "__main__":
     parser.add_argument('--root', type=str, default=os.getcwd(), help='Target directory for setup')
     parser.add_argument('--clean', action='store_true', help='Perform a clean build')
     parser.add_argument('--decks', type=str, default=None, help='Comma-separated list of decks or a path to a file with deck names')
+    parser.add_argument('--log-level', type=str, default='INFO', help='Set the logging level')
     args = parser.parse_args()
 
     config = read_config(args.root)
     
     # Initialize jogger for tracking errors/success
-    initialize_logging(config)
+    initialize_logging(config, args.log_level)
     
     # Log status
     logging.info(f"Building {config["info"].get("project_title", config["info"].get("short_title", "RevealPack Presentations"))}")
@@ -577,7 +698,7 @@ if __name__ == "__main__":
     env = Environment(loader=FileSystemLoader("."))
 
     # Step 1: Copy libraries
-    copy_libraries()
+    # copy_libraries()
 
     # Step 2: Copy plugins
     copy_plugins()

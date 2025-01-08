@@ -47,7 +47,8 @@ def setup(args, root):
 @click.option('-r', '--root', default=os.getcwd(), help='Root directory for build')
 @click.option('-c', '--clean', is_flag=True, help='Perform a clean build')
 @click.option('-d', '--decks', type=click.Path(exists=True, dir_okay=False, readable=True), help='Specify decks to build (comma-separated values or a file path)')
-def build(args, root, clean, decks):
+@click.option('-l', '--log-level', type=click.Choice(['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL']), default='INFO', help='Set the logging level')
+def build(args, root, clean, decks, log_level):
     """Build the presentation package."""
 
     build_script = os.path.join(os.path.dirname(__file__), 'build.py')
@@ -55,13 +56,18 @@ def build(args, root, clean, decks):
     build_args = ['--root', root] + list(args)
 
     # Handle clean build
-    if clean or decks:
+    if clean:
         build_args.append('--clean')
 
     # Handle deck specification
     if decks:
         build_args.append('--decks')
         build_args.append(decks)
+
+    # Handle log level
+    if log_level:
+        build_args.append('--log-level')
+        build_args.append(log_level)
 
     try:
         subprocess.run([python_executable, build_script] + build_args, check=True)

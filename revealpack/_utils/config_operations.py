@@ -19,9 +19,12 @@ def read_config(target_dir):
         sys.exit(1)
 
 
-def initialize_logging(config):
+def initialize_logging(config, log_level=None):
     """Initialize logging based on the config.json settings."""
-    log_level = config.get("logging", "debug").upper()
+    if log_level:
+        log_level = log_level.upper()
+    else:
+        log_level = config.get("logging", "info").upper()
     logging.basicConfig(level=getattr(logging, log_level, logging.INFO))
 
 
