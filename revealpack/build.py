@@ -28,12 +28,14 @@ from _utils.presentation_operations import (
 )
 
 
-def get_referenced_files(html_content, libraries_dir):
+def get_referenced_files(html_content, libraries_dir, source_root=None, current_path=None):
     """Extract file references from HTML content that are in the libraries directory.
     
     Args:
         html_content (str): The rendered HTML content
         libraries_dir (str): The name of the libraries directory
+        source_root (str, optional): The source directory root, needed for recursive HTML scanning
+        current_path (str, optional): Current file path being processed, for relative path resolution
         
     Returns:
         set: Set of unique file paths referenced in the HTML that are in libraries_dir
@@ -88,6 +90,22 @@ def get_referenced_files(html_content, libraries_dir):
                     relative_path = os.path.join(*relative_parts)
                     logging.debug(f"    Adding relative path: {relative_path}")
                     referenced_files.add(relative_path)
+                    
+                    # If this is an HTML file and we have a source root, recursively scan it
+                    if source_root and relative_path.endswith('.html'):
+                        html_path = os.path.join(source_root, relative_path)
+                        if os.path.exists(html_path):
+                            logging.debug(f"    Recursively scanning HTML file: {html_path}")
+                            with open(html_path, 'r', encoding='utf-8') as f:
+                                sub_html_content = f.read()
+                            # Recursively scan the HTML content
+                            sub_files = get_referenced_files(
+                                sub_html_content, 
+                                libraries_dir,
+                                source_root=source_root,
+                                current_path=relative_path
+                            )
+                            referenced_files.update(sub_files)
             except ValueError:
                 logging.debug(f"    Skipping path: {path} (no {libraries_dir} found)")
             except Exception as e:
@@ -102,14 +120,19 @@ def get_referenced_files(html_content, libraries_dir):
                 
     return referenced_files
 
-def copy_libraries(specific_files=None):
-    """Copy libraries to the production directory."""
+def copy_libraries():
+    """Copy all contents of the libraries directory to the build directory."""
     logging.info("Copying libraries...")
 
     # Source and destination directories
-    source_dir = config["directories"]["source"]["root"]
-    logging.debug(f"Source directory: {source_dir}")
-    dest_dir = str(config["directories"]["build"])
+    source_dir = os.path.join(
+        config["directories"]["source"]["root"],
+        config["directories"]["source"]["libraries"]
+    )
+    dest_dir = os.path.join(
+        config["directories"]["build"], 
+        config["directories"]["source"]["libraries"]
+    )
 
     # Check if source directory exists
     if not os.path.exists(source_dir):
@@ -119,25 +142,9 @@ def copy_libraries(specific_files=None):
     # Create destination directory if it doesn't exist
     os.makedirs(dest_dir, exist_ok=True)
 
-    # Determine which files to process
-    if specific_files is not None:
-        files_to_check = list(specific_files)  # Convert to list to allow indexing
-        # Track indices of missing files
-        missing_indices = []
-        for i, file in enumerate(files_to_check):
-            s = os.path.join(source_dir, *[part for part in file.replace('\\', '/').split('/')])
-            if not os.path.exists(s):
-                logging.info(f"Referenced file not found: {s}")
-                missing_indices.append(i)
-        
-        # Remove missing files in reverse order to maintain correct indices
-        for idx in reversed(missing_indices):
-            files_to_check.pop(idx)
-    else:
-        files_to_check = os.listdir(source_dir)
-
+    
     # Copy files
-    for item in files_to_check:
+    for item in os.listdir(source_dir):
         s = os.path.join(source_dir, *[part for part in item.replace('\\', '/').split('/')])
         logging.debug(f"  Copying {s}")
         d = os.path.join(dest_dir, item)
@@ -149,7 +156,6 @@ def copy_libraries(specific_files=None):
         else:
             logging.info(f"  Could not find source file: {s}")
 
-    logging.info("Libraries copied successfully.")
 
 def copy_custom_scripts():
     """Copy custom scripts, if any, to the desired directory"""
@@ -455,12 +461,9 @@ def generate_presentation(decks=None):
     """Generate the final presentation HTML."""
     logging.info("Generating presentations...")
 
-    # Initialize variables for collecting all referenced files
-    all_referenced_files = set()
-    rendered_presentations = []
-
     # Initialize an empty array to collect presentation data for TOC
     presentations_for_toc = []
+    rendered_presentations = []
 
     # Create a Jinja2 environment and add the custom filter
     env = Environment(
@@ -553,11 +556,6 @@ def generate_presentation(decks=None):
 
         # Render the HTML
         rendered_html = template.render(deck=deck)
-        logging.debug(f"Rendered HTML for {presentation_folder}, searching for library references...")
-        
-        # Collect file references
-        referenced_files = get_referenced_files(rendered_html, libraries_dir)
-        all_referenced_files.update(referenced_files)
         
         # Store rendered HTML for later
         rendered_presentations.append({
@@ -566,8 +564,8 @@ def generate_presentation(decks=None):
             'deck': deck
         })
 
-    # Copy libraries with collected file references
-    copy_libraries(all_referenced_files)
+    # Copy all library files
+    copy_libraries()
 
     # Second pass: write out all presentations
     for presentation in rendered_presentations:
