@@ -6,7 +6,7 @@ try:
     from importlib.metadata import version
     __version__ = version("RevealPack")
 except Exception:
-    __version__ = "1.2.9"
+    __version__ = "1.2.10"
 
 __description__ = f"RevealPack v{__version__} - A CLI tool for managing Reveal.js presentation packages"
 

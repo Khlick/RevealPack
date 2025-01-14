@@ -9,8 +9,14 @@ from revealpack import copy_config_and_assets
 from ._version import get_version, get_description
 
 @click.group()
-@click.version_option(version=get_version(), message='%(prog)s version %(version)s\n%(description)s', 
-                     prog_name="RevealPack")
+@click.version_option(
+    version=get_version(),
+    message=(
+        '%(prog)s version %(version)s\n'
+        f'{get_description()}'
+    ),
+    prog_name="RevealPack"
+)
 def cli():
     """RevealPack - A CLI tool for managing Reveal.js presentation packages"""
     pass
