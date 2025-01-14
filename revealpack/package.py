@@ -237,7 +237,7 @@ jobs:
             ./dist/{package_name}-${{{{ github.ref_name }}}}-win-x64.exe
             ./dist/{package_name}-${{{{ github.ref_name }}}}-win-ia32.exe
         env:
-          GITHUB_TOKEN: ${{{ secrets.GITHUB_TOKEN }}}
+          GITHUB_TOKEN: ${{{{ secrets.GITHUB_TOKEN }}}}
 """
     workflow_path = os.path.join(dest_dir, '.github', 'workflows', 'build-and-release.yml')
     os.makedirs(os.path.dirname(workflow_path), exist_ok=True)
