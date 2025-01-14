@@ -44,7 +44,7 @@ include = [
 ]
 
 [tool.poetry.dependencies]
-python = ">=3.12"
+python = ">=3.12,<4.0"
 click = "*"
 beautifulsoup4 = "*"
 jinja2 = "*"
@@ -59,7 +59,7 @@ mkdocs-material = "*"
 [tool.poetry.group.dev.dependencies]
 build = "*"
 twine = "*"
-poetry-dynamic-versioning = "^1.0.0"
+poetry-dynamic-versioning = {version = "^1.0.0", python = ">=3.12,<4.0"}
 
 [tool.poetry.scripts]
 revealpack = "revealpack.cli:cli"
