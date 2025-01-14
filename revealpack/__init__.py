@@ -2,7 +2,12 @@ import os
 import json
 import shutil
 
-__version__ = "1.1.0"
+try:
+    from importlib.metadata import version
+    __version__ = version("RevealPack")
+except Exception:
+    __version__ = "1.2.9"
+
 __description__ = f"RevealPack v{__version__} - A CLI tool for managing Reveal.js presentation packages"
 
 def copy_file_or_directory(src, dest):

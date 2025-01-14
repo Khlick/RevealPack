@@ -7,8 +7,6 @@ build-backend = "poetry.dynamic.versioning.backend"
 
 [tool.poetry]
 name = "RevealPack"
-dynamic = ["version", "description"]
-description = "A CLI tool for managing Reveal.js presentation packages"
 authors = ["Khris Griffis, Ph.D. <khris.griffis.phd@gmail.com>"]
 license = "MIT"
 readme = "README.md"
@@ -74,3 +72,13 @@ enable = true
 vcs = "git"
 style = "pep440"
 pattern = "^(?P<base>\\d+\\.\\d+\\.\\d+)$"
+format = "{base}"
+strict = false
+dirty = false
+
+[tool.poetry-dynamic-versioning.substitution]
+files = ["revealpack/__init__.py"]
+patterns = [
+    "^__version__ = ['\"]([^'\"]*)['\"]",
+    "^version = ['\"]([^'\"]*)['\"]"
+]
