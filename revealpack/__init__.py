@@ -2,6 +2,9 @@ import os
 import json
 import shutil
 
+__version__ = "1.1.0"
+__description__ = f"RevealPack v{__version__} - A CLI tool for managing Reveal.js presentation packages"
+
 def copy_file_or_directory(src, dest):
     """Copy a file or directory to the specified destination."""
     if os.path.isdir(src):

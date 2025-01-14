@@ -6,23 +6,14 @@ import webbrowser
 import http.server
 import socketserver
 from revealpack import copy_config_and_assets
+from ._version import get_version, get_description
 
-@click.group(invoke_without_command=True)
-@click.pass_context
-def cli(ctx):
-    """A CLI tool for managing Reveal.js presentation packages.
-
-    Available commands:
-    - init: Initialize the file structure and copy config.json and assets.
-    - setup: Setup the environment for building presentations.
-    - build: Build the presentation package.
-    - serve: Serve the presentation for live editing.
-    - package: Package the presentation into a distributable format.
-    - docs: Display the documentation for revealpack.
-    
-    """
-    if ctx.invoked_subcommand is None:
-        click.echo(ctx.get_help())
+@click.group()
+@click.version_option(version=get_version(), message='%(prog)s version %(version)s\n%(description)s', 
+                     prog_name="RevealPack")
+def cli():
+    """RevealPack - A CLI tool for managing Reveal.js presentation packages"""
+    pass
 
 @cli.command()
 @click.option('--destination', default=None, help='Destination path to copy config.json and assets')
