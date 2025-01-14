@@ -7,6 +7,7 @@ build-backend = "poetry.dynamic.versioning.backend"
 
 [tool.poetry]
 name = "RevealPack"
+version = "1.2.9"
 authors = ["Khris Griffis, Ph.D. <khris.griffis.phd@gmail.com>"]
 license = "MIT"
 readme = "README.md"
@@ -71,7 +72,15 @@ Issues = "https://github.com/Khlick/RevealPack/issues"
 enable = true
 vcs = "git"
 style = "pep440"
-pattern = "^(?P<base>\\d+\\.\\d+\\.\\d+)$"
+pattern = "^v(?P<base>\\d+\\.\\d+\\.\\d+)$"
+format-jinja = """
+    {%- if distance == 0 -%}
+        {{ base }}
+    {%- else -%}
+        {{ base }}.post{{ distance }}+{{ commit }}
+    {%- endif -%}
+"""
+metadata = true
 format = "{base}"
 strict = false
 dirty = false
