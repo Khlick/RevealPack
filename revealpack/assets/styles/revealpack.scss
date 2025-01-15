@@ -373,15 +373,14 @@ $sizes: (
 .q1-width { width:25% !important; }
 .box-width { width:80% !important; }
 
-.center-justify, .center-justify * { text-align: center !important; }
-.left-justify, .left-justify * { text-align: left !important; }
-.right-justify, .right-justify * { text-align: right !important; }
-.just-justify, .just-justify * { 
-  text-align: justify !important; 
-  text-justify: inter-word !important;
-  padding-right: 5px !important;
-  padding-left: 5px !important;
-}
+.left-justify { &, & p, & div {text-align: left; } }
+.right-justify { &, & p, & div { text-align: right; } }
+.just-justify { &, & p, & div { 
+  text-align: justify; 
+  text-justify: inter-word;
+  padding-right: 5px;
+  padding-left: 5px;
+} }
 
 .no-hang {
   // Apply styles to all direct children of an element with the 'no-hang' class
