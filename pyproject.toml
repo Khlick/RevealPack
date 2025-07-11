@@ -1,9 +1,8 @@
 [build-system]
 requires = [
-    "poetry-core>=1.0.0",
-    "poetry-dynamic-versioning>=1.0.0"
+    "poetry-core>=1.0.0"
 ]
-build-backend = "poetry.dynamic.versioning.backend"
+build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "RevealPack"
@@ -59,7 +58,6 @@ mkdocs-material = "*"
 [tool.poetry.group.dev.dependencies]
 build = "*"
 twine = "*"
-poetry-dynamic-versioning = {version = "^1.0.0", python = ">=3.12,<4.0"}
 
 [tool.poetry.scripts]
 revealpack = "revealpack.cli:cli"
@@ -67,27 +65,3 @@ revealpack = "revealpack.cli:cli"
 [tool.poetry.urls]
 Homepage = "https://github.com/Khlick/RevealPack"
 Issues = "https://github.com/Khlick/RevealPack/issues"
-
-[tool.poetry-dynamic-versioning]
-enable = true
-vcs = "git"
-style = "pep440"
-pattern = "^v(?P<base>\\d+\\.\\d+\\.\\d+)$"
-format-jinja = """
-    {%- if distance == 0 -%}
-        {{ base }}
-    {%- else -%}
-        {{ base }}.post{{ distance }}+{{ commit }}
-    {%- endif -%}
-"""
-metadata = true
-format = "{base}"
-strict = false
-dirty = false
-
-[tool.poetry-dynamic-versioning.substitution]
-files = ["revealpack/__init__.py"]
-patterns = [
-    "^__version__ = ['\"]([^'\"]*)['\"]",
-    "^version = ['\"]([^'\"]*)['\"]"
-]
