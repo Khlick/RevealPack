@@ -6,7 +6,7 @@ try:
     from importlib.metadata import version
     __version__ = version("RevealPack")
 except Exception:
-    __version__ = "1.2.10" # fallback
+    __version__ = "1.3.0" # fallback
 
 __description__ = f"RevealPack v{__version__} - A CLI tool for managing Reveal.js presentation packages"
 
@@ -42,7 +42,7 @@ def generate_config(destination):
             }
         },
         "packages": {
-            "reveal.js": "5.1.0",
+            "reveal.js": "5.2.1",
             "reveal_plugins": {
                 "built_in": [
                     "notes",

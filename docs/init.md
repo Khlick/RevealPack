@@ -2,49 +2,213 @@
 
 ## Description
 
-The `revealpack init` command initializes the file structure for a new Reveal.js presentation project. It copies a generic `config.json` file and the `assets` directory to the specified destination. Additionally, it creates a `decks` directory for storing individual presentation decks.
+The `revealpack init` command initializes a new RevealPack project by creating the essential configuration file and copying necessary assets to your project directory. This is the first step in setting up a RevealPack project.
 
 ## Usage
 
-```sh
-revealpack init [OPTIONS]
+```bash
+revealpack init [--destination PATH]
 ```
 
 ### Options
 
-- `--destination` (optional): The path where `config.json` and `assets` should be copied. If not provided, they will be copied to the current directory.
+- `--destination PATH` (optional): The destination directory where the project should be initialized. If not provided, the current working directory will be used.
 
 ### Examples
 
-#### Initialize in the Current Directory
+#### Initialize in Current Directory
 
-To initialize the project structure in the current directory, simply run:
+To initialize a RevealPack project in the current directory:
 
-```sh
+```bash
 revealpack init
 ```
 
-#### Initialize in a Specific Directory
+#### Initialize in Specific Directory
 
-To initialize the project structure in a specific directory, use the `--destination` option:
+To initialize a RevealPack project in a specific directory:
 
-```sh
-revealpack init --destination /path/to/your/project
+```bash
+revealpack init --destination /path/to/my/project
 ```
 
-## File Structure
+## What Gets Created
 
-After running the `revealpack init` command, the following structure will be created:
+When you run `revealpack init`, the following files and directories are created:
 
-```plaintext
-your-project-directory/
-├── config.json
-└── assets/
-    └── ... (revealpack assets)
+### 1. `config.json`
+A comprehensive configuration file that controls all aspects of your RevealPack project:
+
+```json
+{
+  "info": {
+    "authors": ["Your Name"],
+    "short_title": "Lectures",
+    "project_title": "Science Lectures",
+    "year": "2024",
+    "version": "1.0.0"
+  },
+  "directories": {
+    "build": "build",
+    "package": "dist",
+    "source": {
+      "root": "source",
+      "presentation_root": "decks",
+      "libraries": "lib"
+    }
+  },
+  "packages": {
+    "reveal.js": "5.1.0",
+    "reveal_plugins": {
+      "built_in": ["notes", "highlight", "math"],
+      "external": {}
+    }
+  },
+  "theme": "simple",
+  "reveal_configurations": {
+    "center": false,
+    "controls": true,
+    "transition": "fade"
+  }
+}
 ```
 
-### `config.json`
+### 2. `assets/` Directory
+Contains RevealPack's built-in assets and resources:
+- Default themes and styles
+- Template files
+- Utility scripts
 
-The `config.json` file is a template configuration file that you can customize to suit your project needs.
+## Configuration Customization
 
-Following `init`, modify the properties in `config.json` for your project, adjust theming files as needed then run [`revealpack setup`](setup.md).
+After initialization, you should customize the `config.json` file for your specific project:
+
+### Project Information
+```json
+{
+  "info": {
+    "authors": ["Your Name", "Co-Author"],
+    "short_title": "My Course",
+    "project_title": "Advanced Topics in Computer Science",
+    "year": "2024",
+    "version": "1.0.0",
+    "keywords": ["computer science", "algorithms", "data structures"]
+  }
+}
+```
+
+### Directory Structure
+You can customize the directory structure to match your preferences:
+
+```json
+{
+  "directories": {
+    "build": "output",
+    "package": "distribution",
+    "source": {
+      "root": "src",
+      "presentation_root": "presentations",
+      "libraries": "assets"
+    }
+  }
+}
+```
+
+### Reveal.js Configuration
+Configure Reveal.js version and plugins:
+
+```json
+{
+  "packages": {
+    "reveal.js": "5.2.1",
+    "reveal_plugins": {
+      "built_in": ["notes", "highlight", "math", "zoom"],
+      "external": {
+        "reveal-chart": {
+          "version": "1.0.0",
+          "url": "https://github.com/example/reveal-chart/releases/download/v1.0.0/reveal-chart.zip"
+        }
+      }
+    }
+  }
+}
+```
+
+**Note:** RevealPack is tested with Reveal.js 5.2.1 and is backwards compatible with Reveal.js 4.x versions.
+
+### Theme Settings
+Configure your presentation theme:
+
+```json
+{
+  "theme": "custom-theme.scss",
+  "highlight_theme": "monokai",
+  "custom_scripts": ["src/scripts/custom.js"]
+}
+```
+
+### Reveal.js Options
+Customize Reveal.js behavior:
+
+```json
+{
+  "reveal_configurations": {
+    "center": true,
+    "controls": true,
+    "controlsBackArrows": "faded",
+    "controlsLayout": "bottom-right",
+    "transition": "slide",
+    "transitionSpeed": "fast",
+    "width": 1920,
+    "height": 1080,
+    "margin": 0.1,
+    "minScale": 0.2,
+    "maxScale": 1.5
+  }
+}
+```
+
+## Next Steps
+
+After running `revealpack init`, proceed with:
+
+1. **Customize Configuration**: Edit `config.json` to match your project requirements
+2. **Setup Environment**: Run `revealpack setup` to create directories and download dependencies
+3. **Create Content**: Add your presentation content to the source directories
+4. **Build Presentations**: Use `revealpack build` to compile your presentations
+
+## File Structure After Init
+
+```
+your-project/
+├── config.json          # Project configuration
+└── assets/              # RevealPack assets
+    ├── styles/
+    ├── templates/
+    └── ...
+```
+
+## Troubleshooting
+
+### Permission Errors
+If you encounter permission errors when creating files:
+- Ensure you have write permissions in the destination directory
+- Try running with elevated privileges if necessary
+
+### File Already Exists
+If `config.json` already exists:
+- The existing file will be backed up with a `.bak` extension
+- A new `config.json` will be created with default settings
+
+### Assets Directory Issues
+If the `assets/` directory cannot be created:
+- Check available disk space
+- Verify directory permissions
+- Ensure the destination path is valid
+
+## Best Practices
+
+1. **Use Version Control**: Initialize a git repository after running `revealpack init`
+2. **Backup Configuration**: Keep backups of your `config.json` file
+3. **Document Changes**: Comment your configuration changes for future reference
+4. **Test Configuration**: Run `revealpack setup` to validate your configuration

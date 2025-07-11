@@ -7,7 +7,7 @@ build-backend = "poetry.dynamic.versioning.backend"
 
 [tool.poetry]
 name = "RevealPack"
-version = "1.2.10"
+version = "1.3.0"
 description = "A CLI tool for managing Reveal.js presentation packages"
 authors = ["Khris Griffis, Ph.D. <khris.griffis.phd@gmail.com>"]
 license = "MIT"
@@ -53,7 +53,6 @@ pyyaml = "*"
 requests = "*"
 watchdog = "*"
 flask = "*"
-libsass = "*"
 mkdocs = "*"
 mkdocs-material = "*"
 

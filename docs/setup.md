@@ -1,5 +1,19 @@
 # `revealpack setup`
 
+## Prerequisites
+
+**⚠️ Important:** Before running `revealpack setup`, ensure you have Dart Sass CLI installed on your system. RevealPack requires Dart Sass to compile SCSS/SASS theme files, and the build process will fail without it.
+
+**Install Dart Sass:**
+- Visit [https://sass-lang.com/install](https://sass-lang.com/install)
+- Follow the installation instructions for your operating system
+- Verify installation: `sass --version`
+
+**Reveal.js Compatibility:**
+- **Tested Version**: Reveal.js 5.2.1
+- **Backwards Compatible**: Reveal.js 4.x versions
+- **Minimum Version**: Reveal.js 4.0.0
+
 ## Description
 
 The `revealpack setup` command sets up the environment for building Reveal.js presentations. It reads the [`config.json`](config.md) file generated in the [`init`](init.md) step, creates necessary directories, downloads and installs Reveal.js packages, checks the theme, and generates the necessary templates used in the next, [`build`](build.md) step.

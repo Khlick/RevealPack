@@ -1,84 +1,360 @@
-markdown_content = """
 # `revealpack package`
 
-The `revealpack package` command sets up a project for packaging your presentations into standalone executables using Electron. This command handles the necessary files and configurations for packaging your presentation with Electron Builder. It can be used multiple times to update an existing package or create a new one from scratch.
+## Description
 
-## Overview
+The `revealpack package` command creates a distributable package of your presentations as a standalone Electron application. This allows you to distribute your presentations as desktop applications that can run independently without requiring a web server or internet connection.
 
-The `revealpack package` command copies the built presentation files to a specified destination directory and sets up essential project files, including `package.json`, installer configurations for macOS and Windows, and other assets. If the package already exists, the command updates relevant metadata, such as the version number, in `package.json` and cleans the target directory to ensure only the latest files are included.
+## Prerequisites
+
+**⚠️ Dart Sass CLI Required:** The `package` command may trigger builds that require Dart Sass CLI to compile SCSS/SASS theme files. If Dart Sass is not installed or not available in your system PATH, the build process will fail.
+
+**Install Dart Sass:**
+- Visit [https://sass-lang.com/install](https://sass-lang.com/install)
+- Follow the installation instructions for your operating system
+- Verify installation: `sass --version`
 
 ## Usage
 
-To package your presentations, navigate to your project directory and run:
-
-```sh
-revealpack package --target-dir /path/to/package/directory
+```bash
+revealpack package [OPTIONS]
 ```
 
 ### Options
 
-- `--root <directory>`: Specifies the root directory for packaging. Defaults to the current working directory.
-- `--target-dir <directory>`: Specifies the directory where the package will be created. Defaults to the directory specified in `config.json` under `directories.package` or `package_output`.
-- `--no-build`: Skips the build step, useful if the build has already been completed and you only need to package the results.
-- `--clean`: Performs a clean build before packaging, ensuring that only fresh files are included.
-- `--decks <file or string>`: Specifies a comma-separated list of deck names or a path to a file containing deck names to be built and included in the package. This triggers an automatic clean build.
+- `--root PATH`: Root directory for the project (default: current working directory)
+- `--target-dir PATH`: Output directory for the package (default: config.json `directories.package`)
+- `--no-build`: Skip the build step and package existing build files
+- `--clean`: Perform a clean build before packaging
+- `--decks LIST`: Build and package specific decks (comma-separated values or file path)
 
-Example:
+### Examples
 
-```sh
-revealpack package --root /path/to/project --target-dir /path/to/package/directory --no-build
+#### Basic Package
+
+Create a package with all presentations:
+
+```bash
+revealpack package
 ```
 
-## Configuration
+#### Package to Specific Directory
 
-The packaging process relies on configurations specified in your `config.json` file. Below are key configurations:
+Create a package in a custom directory:
 
-### `info`
+```bash
+revealpack package --target-dir /path/to/distribution
+```
 
-- `project_title`: The full title of your project.
-- `short_title`: A concise title for your project.
-- `version`: The current version of your project.
-- `authors`: An array containing the names of the authors.
+#### Package Without Rebuilding
 
-### `directories`
+Package existing build files without rebuilding:
 
-- `build`: Directory where the built presentation will be output (e.g., `dist`).
-- `package`: Directory where the packaged files will be output.
+```bash
+revealpack package --no-build
+```
 
-## Packaging Process
+#### Clean Build and Package
 
-1. **Build the Presentation**: If `--no-build` is not specified, the `build.py` script runs to build the presentation. This may include a clean build or building specific decks if those options are provided.
-   
-2. **Clean Target Directory**: If the target directory exists, the `src` subdirectory is cleaned to ensure only fresh build outputs are included.
-   
-3. **Copy Build Directory**: The contents of the build directory specified in `config.json` are copied to the `src` subdirectory of the package directory.
-   
-4. **Update or Create `package.json`**: If a `package.json` file exists in the target directory, its metadata (such as version number) is updated. If not, a new `package.json` is created with all necessary information for Electron Builder.
-   
-5. **Create `.gitignore`**: A `.gitignore` file is created to exclude unnecessary files from version control.
-   
-6. **Create GitHub Workflow**: A GitHub Actions workflow file is generated to automate the build and release process for the packaged applications.
+Perform a clean build before packaging:
 
-## Notes
+```bash
+revealpack package --clean
+```
 
-- The rendered presentations in the `config.directories.build` will be copied to a `src` directory in the `target-dir`.
-- Ensure all necessary files and dependencies are correctly specified in `config.json` before packaging.
-- The packaging process may take time depending on the size of your presentations and the number of assets included.
+#### Package Specific Decks
 
-For more details on configuring and using Electron Builder after running `revealpack package`, refer to the [Electron Builder documentation](https://www.electron.build/).
+Package only specific presentation decks:
 
-With these steps, you can set up your project to package your presentations into standalone applications for Windows and macOS.
+```bash
+revealpack package --decks "lecture-01,lecture-02"
+```
 
-### Next Steps
+#### Package from Different Directory
 
-Once the package directory is created and populated with the necessary files, review the `package.json` and update any metadata or build steps as needed. Inspect the workflow file in the `.github/workflows` directory to understand how to bundle the presentation with Electron Builder. 
+Package a project from a specific directory:
 
-Add your custom icons in the `assets/icons/[mac/win]` directories depending on your target OS. If you choose not to use custom icons, you can remove the icon field from the `package.json`.
+```bash
+revealpack package --root /path/to/my/project
+```
 
-### Local and GitHub Builds
+## What Gets Created
 
-- To generate installers locally, navigate to the package directory, run `npm install`, and then run the command for your OS:
-  - `npm run package-win` for Windows
-  - `npm run package-mac` for macOS
-- To automate the process with GitHub Actions, initialize a git repository, push a tag to GitHub, and the application will generate a new release and build installers for both macOS and Windows.
-"""
+The package command creates a complete Electron application with the following structure:
+
+```
+target-directory/
+├── package.json              # Node.js package configuration
+├── main.js                   # Electron main process
+├── .gitignore               # Git ignore file
+├── README.md                # Project documentation
+├── .github/
+│   └── workflows/
+│       └── release.yml      # GitHub Actions workflow
+└── src/                     # Application source
+    ├── index.html           # Main application entry point
+    ├── presentations/       # Built presentations
+    │   ├── lecture-01/
+    │   ├── lecture-02/
+    │   └── ...
+    ├── assets/              # Application assets
+    └── styles/              # Compiled styles
+```
+
+## Package Configuration
+
+### package.json
+The generated `package.json` includes:
+
+```json
+{
+  "name": "your-project-name",
+  "version": "1.0.0",
+  "description": "Your project description",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "package-win": "electron-builder --win",
+    "package-mac": "electron-builder --mac",
+    "test": "echo \"No tests specified\" && exit 1"
+  },
+  "devDependencies": {
+    "electron": "^31.4.0",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.yourproject",
+    "productName": "Your Project Name",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "src/**/*",
+      "main.js"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "assets/icons/win/icon.ico"
+    },
+    "mac": {
+      "target": "dmg",
+      "icon": "assets/icons/mac/icon.icns"
+    }
+  }
+}
+```
+
+### main.js
+The Electron main process file that:
+- Creates the application window
+- Loads the main HTML file
+- Handles application lifecycle
+- Manages window settings
+
+### GitHub Actions Workflow
+Automated build and release workflow for:
+- Building on multiple platforms
+- Creating release assets
+- Publishing to GitHub releases
+
+## Build Process
+
+### 1. Build Step (Optional)
+If not using `--no-build`:
+- Runs `revealpack build` with specified options
+- Compiles all presentations
+- Processes themes and assets
+
+### 2. File Copying
+- Copies built presentations to `src/presentations/`
+- Copies assets and libraries
+- Preserves directory structure
+
+### 3. Configuration Generation
+- Creates `package.json` with project metadata
+- Generates Electron main process file
+- Creates GitHub Actions workflow
+- Adds `.gitignore` and `README.md`
+
+### 4. Asset Preparation
+- Organizes files for Electron packaging
+- Ensures all dependencies are included
+- Validates file structure
+
+## Distribution Options
+
+### Desktop Applications
+The packaged application can be distributed as:
+
+#### Windows
+- **NSIS Installer**: `.exe` installer with custom branding
+- **Portable**: Standalone executable
+- **MSI**: Windows installer package
+
+#### macOS
+- **DMG**: Disk image with drag-and-drop installation
+- **PKG**: Package installer
+- **App**: Standalone application bundle
+
+#### Linux
+- **AppImage**: Portable application
+- **Deb**: Debian package
+- **RPM**: Red Hat package
+
+### Web Distribution
+The built presentations can also be:
+- Hosted on web servers
+- Deployed to CDNs
+- Embedded in other applications
+
+## Configuration Options
+
+### Project Information
+Configure in `config.json`:
+
+```json
+{
+  "info": {
+    "authors": ["Your Name"],
+    "short_title": "My Course",
+    "project_title": "Advanced Topics in Computer Science",
+    "year": "2024",
+    "version": "1.0.0",
+    "keywords": ["education", "presentations", "course"]
+  }
+}
+```
+
+### Package Settings
+Control packaging behavior:
+
+```json
+{
+  "directories": {
+    "package": "dist"
+  },
+  "force_plugin_download": true
+}
+```
+
+## Building Distributables
+
+After packaging, you can create platform-specific distributables:
+
+### Install Dependencies
+```bash
+cd target-directory
+npm install
+```
+
+### Build for Windows
+```bash
+npm run package-win
+```
+
+### Build for macOS
+```bash
+npm run package-mac
+```
+
+### Build for All Platforms
+```bash
+npm run package-all
+```
+
+## Application Features
+
+### Standalone Operation
+- No internet connection required
+- No web server needed
+- Self-contained application
+
+### Navigation
+- Built-in presentation browser
+- Table of contents
+- Keyboard shortcuts
+- Full-screen mode
+
+### Customization
+- Branded with your project information
+- Custom icons and styling
+- Configurable window settings
+
+## Troubleshooting
+
+### Build Failures
+1. **Dart Sass Missing**: Install Dart Sass CLI
+2. **Configuration Errors**: Check config.json syntax
+3. **File Path Issues**: Verify file paths in configuration
+
+### Package Creation Issues
+1. **Permission Errors**: Ensure write access to target directory
+2. **Disk Space**: Check available space for package creation
+3. **File Conflicts**: Ensure target directory is empty or use different path
+
+### Electron Build Issues
+1. **Node.js Version**: Ensure compatible Node.js version
+2. **Dependencies**: Run `npm install` in package directory
+3. **Platform Support**: Check platform-specific requirements
+
+### Distribution Issues
+1. **Code Signing**: Required for macOS distribution
+2. **Windows Certificate**: Required for Windows distribution
+3. **File Size**: Large packages may need optimization
+
+## Best Practices
+
+### Before Packaging
+1. **Test Builds**: Ensure all presentations build correctly
+2. **Optimize Assets**: Compress images and optimize file sizes
+3. **Update Metadata**: Verify project information in config.json
+4. **Clean Build**: Use `--clean` flag for fresh builds
+
+### Package Management
+1. **Version Control**: Keep package source under version control
+2. **Incremental Updates**: Use `--no-build` for quick packaging
+3. **Testing**: Test packaged applications on target platforms
+4. **Documentation**: Update README.md with usage instructions
+
+### Distribution
+1. **Code Signing**: Sign applications for trusted distribution
+2. **Update Channels**: Set up automatic update mechanisms
+3. **User Feedback**: Include feedback mechanisms in applications
+4. **Analytics**: Consider adding usage analytics (with user consent)
+
+## Advanced Usage
+
+### Custom Electron Configuration
+Modify the generated `main.js` for custom behavior:
+- Window size and position
+- Menu customization
+- Security settings
+- Update mechanisms
+
+### Automated Distribution
+Use the GitHub Actions workflow for:
+- Automated builds on multiple platforms
+- Release management
+- Continuous deployment
+
+### Integration with CI/CD
+Integrate packaging into your build pipeline:
+```bash
+# In CI/CD pipeline
+revealpack build --clean
+revealpack package --target-dir dist
+npm run package-all
+```
+
+## File Size Optimization
+
+### Reduce Package Size
+1. **Optimize Images**: Compress images and use appropriate formats
+2. **Minify Assets**: Minify CSS and JavaScript files
+3. **Remove Unused Files**: Clean up unused assets and libraries
+4. **Use CDNs**: Consider external CDNs for large libraries
+
+### Package Structure
+Organize files efficiently:
+- Separate large assets into optional downloads
+- Use lazy loading for non-critical resources
+- Implement progressive loading for large presentations

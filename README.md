@@ -1,108 +1,379 @@
-# RevealPack Documentation
+# RevealPack
 
-Welcome to the RevealPack documentation. RevealPack is a command-line interface (CLI) tool for managing and building multiple Reveal.js presentations.
+**A comprehensive CLI tool for managing and building multiple Reveal.js presentations with shared themes and resources.**
 
-## Motivation
+RevealPack is designed for creating suites of presentations that share themes and resources, such as lecture series, multi-day seminars, or training programs. It abstracts the slide deck creation process while providing complete control over individual slides or groups of slides within each presentation.
 
-RevealPack is more than just a Reveal.js presentation starter; it's a comprehensive framework for creating suites of presentations that share themes and resources, such as a lecture series or a multi-day seminar. RevealPack abstracts much of the slide deck creation process, allowing for complete control over individual slides or groups of slides within each presentation. 
+## 🚀 Key Features
 
-With RevealPack, you can:
-- Create slides individually or group multiple slides in one file.
-- Share raw HTML or Markdown slides with others.
-- Create section title slides or decorate the `section` tag with YAML headers.
-- Serve your presentation during development with live updating for smart automatic rebuilds of changed files.
+- **Multi-Presentation Management**: Create and manage multiple presentations from a single project
+- **Shared Resources**: Common libraries, themes, and assets across all presentations
+- **Flexible Content**: Support for HTML, Markdown, and mixed content slides
+- **Live Development**: Real-time preview with automatic rebuilds on file changes
+- **Theme Compilation**: SCSS/SASS support with Dart Sass compilation
+- **Plugin Management**: Built-in and external plugin support with automatic downloading
+- **Distribution Ready**: Package presentations for standalone distribution
+- **Customizable**: Extensive configuration options for themes, plugins, and presentation settings
 
-## Commands
+## 📋 Requirements
 
-- [`init`](init.md): Initialize the directory structure.
-- [`setup`](setup.md): Set up the environment.
-- [`build`](build.md): Build the presentations.
-- [`serve`](serve.md): Serve the presentations locally.
-- [`package`](package.md): Package the presentation for distribution.
-- `docs`: View the documentation.
+- **Python** >= 3.12 (3.9+ supported, 3.12+ recommended)
+- **Dart Sass CLI** - Required for SCSS/SASS theme compilation
+- **Reveal.js** >= 4.0.0 (tested with 5.2.1, backwards compatible with 4.x)
 
-## Installation
+### Install Dart Sass
 
-### Requirements
+RevealPack requires the Dart Sass CLI to compile SCSS/SASS theme files. **The build process will fail without it.**
 
-- Python >3.9, (>=3.12 recommended)
+**Install Dart Sass from the official website:**
+- Visit [https://sass-lang.com/install](https://sass-lang.com/install)
+- Follow the installation instructions for your operating system
+- Ensure `sass` is available in your system PATH
+
+**Alternative installation methods:**
+```bash
+# macOS (using Homebrew)
+brew install sass/sass/sass
+
+# Windows (using Chocolatey)
+choco install sass
+
+# Linux (using npm)
+npm install -g sass
+```
+
+**Verify installation:**
+```bash
+sass --version
+```
+
+## 🛠️ Installation
 
 ### Install RevealPack from PyPI
-
-To install RevealPack, run:
 
 ```bash
 pip install revealpack
 ```
 
-_Note: Use the appropriate method for your setup, e.g., `pip3` or `python -m pip...`._
+*Note: Use the appropriate method for your setup, e.g., `pip3` or `python -m pip...`*
 
-## Workflow
+## 🏗️ Project Structure
 
-### Initial Setup
+RevealPack creates a structured project with the following organization:
 
-1. **Choose a Project Directory**: Select a directory for your project. It is recommended to create a Python virtual environment in your chosen directory (`root`) and install RevealPack there, rather than using a global environment.
+```
+your-project/
+├── config.json              # Project configuration
+├── assets/                  # RevealPack assets and themes
+├── source/                  # Source files
+│   ├── lib/                 # Shared libraries and assets
+│   ├── decks/               # Individual presentation decks
+│   │   ├── lecture-01/      # Each subdirectory = one presentation
+│   │   │   ├── slide1.html
+│   │   │   ├── slide2.html
+│   │   │   └── presentation.json
+│   │   └── lecture-02/
+│   ├── cached/              # Downloaded packages (Reveal.js, plugins)
+│   ├── reveal_template.html # Generated presentation template
+│   └── toc_template.html    # Generated table of contents template
+└── build/                   # Built presentations (output)
+    ├── index.html           # Table of contents
+    ├── lecture-01/
+    └── lecture-02/
+```
 
-2. **Initialize the Project**: Navigate your terminal or command window to the root directory, activate your Python 3 environment, and use the `revealpack init` command to initialize the directory for your presentations.
+## 🚀 Quick Start
+
+### 1. Initialize a New Project
 
 ```bash
+# Create a new directory and navigate to it
+mkdir my-presentations
+cd my-presentations
+
+# Initialize RevealPack project
 revealpack init
 ```
 
-3. **Modify Configuration**: Customize the `config.json` file for your project.
+This creates:
+- `config.json` with default settings
+- `assets/` directory with RevealPack resources
 
-4. **Setup Development Environment**: Set up the presentation development environment with the `revealpack setup` command.
+### 2. Configure Your Project
+
+Edit `config.json` to customize:
+- Project information (title, authors, version)
+- Directory structure
+- Reveal.js version and plugins
+- Theme settings
+- Presentation configurations
+
+### 3. Set Up Development Environment
 
 ```bash
 revealpack setup
 ```
 
-### Presentation Development Workflow
+This:
+- Creates necessary directories
+- Downloads Reveal.js and specified plugins
+- Validates theme configuration
+- Generates presentation templates
 
-- **Build Presentations**: Use `revealpack build` to compile your presentations.
+### 4. Create Your Presentations
+
+Add content to `source/decks/`:
+- Each subdirectory becomes a separate presentation
+- Use HTML or Markdown for slides
+- Optionally add `presentation.json` for metadata
+
+### 5. Build Presentations
 
 ```bash
 revealpack build
 ```
 
-  The `revealpack build` command converts slide decks located in the specified source directories into individual presentations, handling everything from copying necessary libraries to compiling themes and generating HTML files. This command processes each subdirectory within the presentation root directory, creating a presentation for each.
+This compiles all presentations with:
+- Theme compilation (SCSS → CSS)
+- Plugin integration
+- Asset copying
+- HTML generation
 
-  **Options**:
-  - `--root <directory>`: Specifies the root directory for the build. Defaults to the current working directory.
-  - `--clean`: Performs a clean build by removing all contents of the build directory before starting the build process.
-  - `--decks <file or string>`: Specifies a comma-separated list of deck names or a path to a file containing deck names to be built. If this option is provided, a clean build is automatically performed.
-
-  The build process includes injecting custom styles and scripts, compiling SCSS/SASS themes, managing plugins, and generating a table of contents for the presentations. It ensures that all necessary files are included and properly configured, resulting in fully functional Reveal.js presentations.
-
-- **Serve Presentations Locally**: Use `revealpack serve` to start a local server with live reloading for development.
+### 6. Serve for Development
 
 ```bash
 revealpack serve
 ```
 
-- **Package Presentations for Distribution**: Use `revealpack package` to package your presentations into a distributable format.
+Starts a local server with live reloading for development.
 
-```bash
-revealpack package --target-dir <build_directory> [--root <root_directory>] [--no-build] [--clean] [--decks <file_or_string>]
+## 📖 Commands Reference
+
+### `revealpack init [--destination PATH]`
+Initialize a new RevealPack project by copying configuration and assets.
+
+### `revealpack setup [--root PATH]`
+Set up the development environment:
+- Creates project directories
+- Downloads Reveal.js and plugins
+- Validates theme configuration
+- Generates templates
+
+### `revealpack build [OPTIONS]`
+Build all presentations or specified decks.
+
+**Options:**
+- `--root PATH`: Root directory (default: current directory)
+- `--clean`: Perform clean build (removes existing build files)
+- `--decks LIST`: Build specific decks (comma-separated or file path)
+- `--log-level LEVEL`: Set logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+
+### `revealpack serve [OPTIONS]`
+Serve presentations with live reloading for development.
+
+**Options:**
+- `--root PATH`: Root directory (default: current directory)
+- `--no-build`: Skip initial build, serve existing files only
+- `--clean`: Perform clean build before serving
+- `--decks LIST`: Build and serve specific decks
+
+### `revealpack package [OPTIONS]`
+Package presentations for distribution (creates Electron app).
+
+**Options:**
+- `--root PATH`: Root directory (default: current directory)
+- `--target-dir PATH`: Output directory for package
+- `--no-build`: Skip build step
+- `--clean`: Perform clean build before packaging
+- `--decks LIST`: Package specific decks
+
+### `revealpack docs`
+Open RevealPack documentation in your browser.
+
+## ⚙️ Configuration
+
+The `config.json` file controls all aspects of your project:
+
+### Project Information
+```json
+{
+  "info": {
+    "authors": ["Your Name"],
+    "short_title": "Lectures",
+    "project_title": "Science Lectures",
+    "year": "2024",
+    "version": "1.0.0"
+  }
+}
 ```
 
-  The `revealpack package` command prepares your presentations for distribution by copying the built files to a specified destination directory and setting up the necessary project files, including `package.json`, installer configurations for macOS and Windows, and other required assets.
-
-  **Options**:
-  - `--root <directory>`: Specifies the root directory for packaging. Defaults to the current working directory.
-  - `--target-dir <directory>`: Specifies the directory where the package will be created. Defaults to the directory specified in `config.json` under `directories.package` or `package_output` if not set.
-  - `--no-build`: Skips the build step. This is useful if the build has already been done and you only want to package the results.
-  - `--clean`: Performs a clean build before packaging. This ensures that only fresh files are included in the package.
-  - `--decks <file or string>`: Specifies a comma-separated list of deck names or a path to a file containing deck names to be built and included in the package. If this option is provided, a clean build is automatically performed.
-
-  The packaging process includes generating a `package.json` file, setting up installer configurations for both macOS and Windows, and creating a `.gitignore` file and a GitHub Actions workflow to automate the build and release process. This ensures that your presentations are ready to be packaged into standalone applications.
-
-For example, to package your presentations without rebuilding, you would run:
-
-```bash
-revealpack package --target-dir path/to/new/package --no-build
+### Directory Structure
+```json
+{
+  "directories": {
+    "build": "build",
+    "package": "dist",
+    "source": {
+      "root": "source",
+      "presentation_root": "decks",
+      "libraries": "lib"
+    }
+  }
+}
 ```
 
-## Development
+### Reveal.js and Plugins
+```json
+{
+  "packages": {
+    "reveal.js": "5.2.1",
+    "reveal_plugins": {
+      "built_in": ["notes", "highlight", "math"],
+      "external": {
+        "plugin-name": {
+          "version": "1.0.0",
+          "url": "https://example.com/plugin.zip",
+          "alias": "optional-alias",
+          "main": "main-file"
+        }
+      }
+    }
+  }
+}
+```
+
+**Note:** RevealPack is tested with Reveal.js 5.2.1 and is backwards compatible with Reveal.js 4.x versions.
+
+### Theme Configuration
+```json
+{
+  "theme": "path/to/theme.scss",
+  "highlight_theme": "monokai",
+  "custom_scripts": ["path/to/script.js"]
+}
+```
+
+### Reveal.js Settings
+```json
+{
+  "reveal_configurations": {
+    "center": false,
+    "controls": true,
+    "transition": "fade",
+    "width": 1920,
+    "height": 1080
+  }
+}
+```
+
+## 🎨 Theming
+
+RevealPack supports both pre-compiled CSS and SCSS/SASS themes:
+
+### SCSS/SASS Themes
+- Create `.scss` or `.sass` files
+- Use variables, mixins, and nested rules
+- Automatic compilation with Dart Sass
+- Hot reloading during development
+
+### Theme Structure
+```scss
+// Example theme.scss
+$primary-color: #007acc;
+$background-color: #f8f9fa;
+
+.reveal {
+  background-color: $background-color;
+  
+  .slides section {
+    color: $primary-color;
+  }
+}
+```
+
+## 📝 Content Creation
+
+### HTML Slides
+Create individual HTML files for each slide:
+
+```html
+<!-- slide1.html -->
+<section>
+  <h1>Welcome to My Presentation</h1>
+  <p>This is the first slide</p>
+</section>
+```
+
+### Markdown Support
+Use Markdown for simpler content:
+
+```markdown
+# Welcome to My Presentation
+
+This is the first slide
+
+---
+
+## Second Slide
+
+- Point 1
+- Point 2
+- Point 3
+```
+
+### Presentation Metadata
+Add `presentation.json` to customize individual presentations:
+
+```json
+{
+  "title": "Lecture 1: Introduction",
+  "author": "Dr. Smith",
+  "date": "2024-01-15",
+  "slides": [
+    "slide1.html",
+    "slide2.html",
+    "slide3.html"
+  ]
+}
+```
+
+## 🔧 Troubleshooting
+
+### Dart Sass Issues
+
+If you encounter errors related to SCSS compilation:
+
+1. **Check if Dart Sass is installed:**
+   ```bash
+   sass --version
+   ```
+
+2. **If not installed, install Dart Sass:**
+   - Visit [https://sass-lang.com/install](https://sass-lang.com/install)
+   - Follow the installation instructions for your operating system
+
+3. **If installed but not found, check your PATH:**
+   - Ensure the directory containing the `sass` executable is in your system PATH
+   - Restart your terminal/command prompt after installation
+
+4. **Environment variable override:**
+   You can specify a custom path to the Dart Sass executable using the `REVEALPACK_SASS_PATH` environment variable:
+   ```bash
+   export REVEALPACK_SASS_PATH=/path/to/your/sass
+   revealpack build
+   ```
+
+### Common Error Messages
+
+- **"Dart Sass CLI not found"**: Install Dart Sass from the official website
+- **"SCSS compilation failed"**: Check your SCSS syntax and ensure Dart Sass is properly installed
+- **"Plugin download failed"**: Check your internet connection and plugin URLs
+- **"Theme not found"**: Verify the theme path in `config.json`
+
+## 🤝 Contributing
 
 For more detailed information on development, see the [Developer's Guide](https://revealpack.readthedocs.io/en/latest/dev/).
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

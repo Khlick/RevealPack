@@ -1,5 +1,21 @@
 # `revealpack build`
 
+## Prerequisites
+
+**⚠️ Dart Sass CLI Required:** The `build` command requires Dart Sass CLI to compile SCSS/SASS theme files. If Dart Sass is not installed or not available in your system PATH, the build process will fail with a clear error message.
+
+**Install Dart Sass:**
+- Visit [https://sass-lang.com/install](https://sass-lang.com/install)
+- Follow the installation instructions for your operating system
+- Verify installation: `sass --version`
+
+**Reveal.js Compatibility:**
+- **Tested Version**: Reveal.js 5.2.1
+- **Backwards Compatible**: Reveal.js 4.x versions
+- **Minimum Version**: Reveal.js 4.0.0
+
+## Description
+
 The `build` command is responsible for converting slide decks located in the specified source directories into individual presentations, including caching plugins and generating the necessary HTML files using Reveal.js. This command processes each subdirectory within the presentation root directory, creating a presentation for each.
 
 #### Options
@@ -29,7 +45,7 @@ The `build` command is responsible for converting slide decks located in the spe
    Both built-in and external plugins specified in the `config.json` are copied from the cached directory to the build directory.
 
 7. **Compile Theme:**
-   If the specified theme is provided as an SCSS/SASS file, it is compiled into a CSS file. If a pre-compiled CSS file is provided, it is used directly.
+   If the specified theme is provided as an SCSS/SASS file, it is compiled into a CSS file using the Dart Sass CLI. If a pre-compiled CSS file is provided, it is used directly. **Note:** SCSS/SASS compilation requires Dart Sass to be installed and available in the system PATH.
 
 8. **Copy Reveal.js Files:**
    Relevant Reveal.js files are copied from the cached directory to the build directory, ensuring the necessary JavaScript and CSS files are available for the presentations.
