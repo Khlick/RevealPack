@@ -258,8 +258,26 @@ $sizes: (
       grid-area: header;
       align-self: center;
       align-content: center;
+      padding-top: 0;
+      padding-bottom: 0;
+      margin-top: 0;
+      margin-bottom: 0;
+      > * {
+        margin-top: 0;
+        margin-bottom: 0;
+        padding-top: 0;
+        padding-bottom: 0;
+      }
+    
+      // Target specifically the MathJax_Display class within the 'no-hang' context
+      .MathJax_Display {
+        margin-top: 0 !important;
+        margin-bottom: 0 !important;
+        padding-top: 0 !important;
+        padding-bottom: 0 !important;
+      }
     }
-    h2 {
+    > h2 {
       grid-area: header;
       align-self: center;
       align-content: center;
@@ -362,6 +380,7 @@ $sizes: (
   }
 }
 .strong { font-weight: bold !important;}
+.bold { font-weight: bold !important; }
 .em { font-style: italic !important; }
 .u { text-decoration: underline; }
 .strike { text-decoration: line-through !important; }
@@ -400,86 +419,148 @@ $sizes: (
 }
 
 .pdf-page {
-  .grid-wrapper{
+  .grid-wrapper {
     .section-title-content {
       .headlines {
         max-width: 100% !important;
+        max-height: 80vh !important;
+
         h2 {
           display: block !important;
-          font-size: 1.3rem !important;
+          font-size: clamp(1.5rem, 4vw, 4.5rem) !important;
+          overflow-wrap: break-word !important;
         }
       }
     }
   }
-}
 
+  .title-slide {
+    max-width: 100vw;
+    max-height: 90vh;
+  }
+
+  .print-invisible {
+    visibility: hidden !important;
+  }
+}
 
 
 /*********************************************
 * EMOJIS
 *********************************************/
+$emojiFont: 'Noto Color Emoji', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji', 'Android Emoji', 'EmojiSymbols', sans-serif;
+
 $emojis: (
+  alien: "\1F47D",
   angry: "\1F621",
   angry_face: "\1F92C",
+  arrowl: "\2190",
   arrowr: "\2192",
-  arrorl: "\2190",
+  atom: "\269B",
   beaker: "\1F9EA",
+  books: "\1F4DA",
   brain: "\1f9e0",
+  bulb: "\1F4A1",
   calculator: "\1f5a9",
   calendar: "\1F5D3",
   chart: "\1F4C8",
-  check: "\2714",
+  chart-up: "\1F4C8",
+  chart-down: "\1F4C9",
+  check: "\2714\FE0E",
+  check-empty: "\2610\FE0F",
+  checklist: "\2611\FE0F",
   clock: "\1F557",
+  compass: "\1F9ED",
   construction: "\1F6A7",
   cool: "\1F60E",
   crying: "\1F62D",
+  dice: "\1F3B2",
   dna: "\1F9EC",
+  dna_double: "\1F9EC",
   double_exclamation: "\203C",
   exclamation: "\2757",
   exclamation_question: "\2049",
+  exploding_head: "\1F92F",
   fire: "\1F525",
   floppy_disk: "\1F4BE",
+  footprint: "\1F463",
   gem_stone: "\1F48E",
   goggles: "\1F97D",
+  graduation_cap: "\1F393",
+  graph: "\1F4C9",
+  grid: "\1F5DE",
   happy: "\1F642",
   key: "\1F5DD",
   lightbulb: "\1F4A1",
   lightning: "\26A1",
   locked: "\1F512",
   loudspeaker: "\1F4E2",
+  magic_wand: "\1FA84",
+  magnifying_glass: "\1F50D",
   medal: "\1F947",
   memo: "\1F4DD",
   microscope: "\1F52C",
   mirror: "\1FA9E",
-  no_entry: "\1F6AB",
+  muscle: "\1F4AA",
+  nerd_face: "\1F913",
+  notebook: "\1F4D3",
   no-entry: "\26D4",
+  no_entry: "\1F6AB",
   party_popper: "\1F389",
   pin: "\1F4CC",
   question: "\2753",
   report: "\1F4DD",
   ribbon: "\1F397",
+  robot: "\1F916",
+  rocket: "\1F680",
   sad: "\1F61E",
   scream: "\1F631",
+  shrug: "\1F937",
   sigh: "\1F614",
   skull_and_crossbones: "\2620",
   smiley: "\1F604",
+  sparkles: "\2728",
   speech_balloon: "\1F5E8",
   star: "\1F31F",
   star-struck: "\1F929",
   stop_sign: "\1F6D1",
+  student: "\1F9D1\200D\1F393",
+  superhero: "\1F9B8",
   target: "\1F3AF",
+  teacher: "\1F9D1\200D\1F3EB",
+  telescope: "\1F52D",
   test_tube: "\1F9EA",
+  thinking: "\1F914",
   thought_balloon: "\1F4AD",
+  trophy: "\1F3C6",
   unlocked: "\1F513",
-  warning: "\1F6A8"
+  vending_machine: "\1F3E7",
+  warning_icon: "\1F6A8",
+  wrench: "\1F527"
 );
 
-// Define a stack of emoji fonts
-$emojiFontStack: 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji', 'Android Emoji', 'EmojiSymbols';
+
+// Build icon for most used emoji list
+i {
+  @each $name, $emoji in $emojis {
+    &.#{$name}::before {
+      content: $emoji;
+      font-family: $emojiFont !important;
+      speak: none;
+      font-style: normal;
+      font-weight: normal;
+      font-variant: normal;
+      text-transform: none;
+      line-height: 1;
+      -webkit-font-smoothing: antialiased;
+      font-size: 75%;
+    }
+  }
+}
 
 // Icon for any unicode character emoji
 i[role="emoji"] {
-  font-family: $emojiFontStack;
+  font-family: $emojiFont !important;
   speak: none;
   font-style: normal;
   font-weight: normal;
@@ -490,24 +571,6 @@ i[role="emoji"] {
   &::before {
     content: attr(data-emoji);
     font-size: 105%;
-  }
-}
-
-// Build icon for most used emoji list
-i {
-  @each $name, $emoji in $emojis {
-    &.#{$name}::before {
-      content: $emoji;
-      font-family: $emojiFontStack;
-      speak: none;
-      font-style: normal;
-      font-weight: normal;
-      font-variant: normal;
-      text-transform: none;
-      line-height: 1;
-      -webkit-font-smoothing: antialiased;
-      font-size: 75%;
-    }
   }
 }
 
@@ -523,18 +586,51 @@ i {
       position: absolute;
       left: 0;
       top: 0;
-      font-family: $emojiFontStack;
+      font-family: $emojiFont !important;
       font-style: normal;
       font-size: 80%;
     }
   }
 }
 
+// Font Awesome capable <li> tags
+li[role="fa"] {
+  list-style: none; /* Remove default list bullet */
+  position: relative;
+  &::before {
+    content: attr(data-icon); /* Insert the icon from data-icon attribute */
+    font-family: "Font Awesome 6 Free"; /* Ensure you use the correct font family */
+    margin-right: 8px; /* Add some space between the icon and text */
+    font-weight: 900;  
+  }
+}
+
 // Build <span> for any emoji
 span.emoji {
-  font-family: $emojiFontStack;
+  font-family: $emojiFont !important;
   font-style: normal;
   display: inline-block;
   vertical-align: middle;
 }
 
+span[role=img][aria-label],
+span[role=img][aria-label] {
+  position: relative;
+}
+
+span[role=img][aria-label]:focus::after,
+span[role=img][aria-label]:hover::after {
+  font-size: 25%;
+  font-family: $mainFont;
+  font-weight: 400;
+  position: absolute;
+  display: block;
+  line-height: 1.2;
+  content: attr(aria-label);
+  z-index: 1;
+  background: $mainColor;
+  color: $backgroundColor;
+  padding: 0.25em;
+  border: 1px solid $backgroundColor;
+  box-shadow: 2px 2px 4px $mainColor;
+}

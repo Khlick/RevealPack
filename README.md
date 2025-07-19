@@ -14,6 +14,7 @@ RevealPack is designed for creating suites of presentations that share themes an
 - **Plugin Management**: Built-in and external plugin support with automatic downloading
 - **Distribution Ready**: Package presentations for standalone distribution
 - **Customizable**: Extensive configuration options for themes, plugins, and presentation settings
+- **Print Control**: Enhanced print functionality with `print-invisible` class and `+show` parameter support
 
 ## 📋 Requirements
 
@@ -326,16 +327,62 @@ Add `presentation.json` to customize individual presentations:
 
 ```json
 {
-  "title": "Lecture 1: Introduction",
-  "author": "Dr. Smith",
-  "date": "2024-01-15",
+  "titlepage": {
+    "headline": [
+      "Lecture 01",
+      "Introduction"
+    ],
+    "background": {
+      "image": "lib/img/cover.png",
+      "size": "cover"
+    },
+    "by": "Author Name",
+    "byinfo": [
+      "Date",
+      "Course Info"
+    ],
+    "notes": []
+  },
+  "footer": {
+    "left": "Lecture 01",
+    "right": "<a href=\"https:\\\\github.com\\Khlick\\revealpack\" target=\"_blank\" rel=\"noopener noreferrer\">&#169;2025</a>"
+  },
   "slides": [
-    "slide1.html",
-    "slide2.html",
-    "slide3.html"
+    "intro.html",
+    "group1.html",
+    "group2.html",
+    "outro.html"
   ]
 }
 ```
+
+## 🖨️ Print Functionality
+
+RevealPack includes enhanced print functionality that extends Reveal.js's built-in print capabilities:
+
+### Print Modes
+
+- **Normal Print**: `?print-pdf` - Standard Reveal.js print mode
+- **Show Hidden Elements**: `?print-pdf+show` - Shows elements with the `print-invisible` class
+
+### Print-Invisible Class
+
+Use the `print-invisible` CSS class to hide elements during normal print mode:
+
+```html
+<div class="print-invisible">
+  <p>This content is hidden in print mode by default</p>
+</div>
+```
+
+When using `?print-pdf+show`, these elements become visible in the printed output.
+
+### Use Cases
+
+- **Speaker Notes**: Hide speaker notes in normal print but show them when needed
+- **Interactive Elements**: Hide interactive elements that don't work in print
+- **Supplementary Content**: Hide additional content that's only relevant during presentation
+- **Debug Information**: Hide development/debug information in final prints
 
 ## 🔧 Troubleshooting
 

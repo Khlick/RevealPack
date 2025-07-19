@@ -140,13 +140,29 @@ Here is an example of what your `config.json` might look like:
 
   <!-- Custom Scripts -->
 
-  <!-- Print PDF script -->
+  <!-- Print PDF and Show logic -->
   <script>
-    var link = document.createElement('link');
+    const params = window.location.search.replace('?', '').split('+');
+    const hasPrintPDF = params.includes('print-pdf');
+    const hasShow = params.includes('show');
+
+    const link = document.createElement('link');
     link.rel = 'stylesheet';
     link.type = 'text/css';
-    link.href = window.location.search.match(/print-pdf/gi) ? './src/css/print/pdf.css' : './src/css/print/paper.css';
-    document.getElementsByTagName('head')[0].appendChild(link);
+    link.href = hasPrintPDF ? './src/css/print/pdf.css' : './src/css/print/paper.css';
+    document.head.appendChild(link);
+
+    if (hasPrintPDF && hasShow) {
+      const style = document.createElement('style');
+      style.innerHTML = `
+        html.print-pdf .reveal .slides .pdf-page section .print-invisible,
+        html.reveal-print .reveal .slides .pdf-page section .print-invisible {
+          visibility: visible !important;
+          display: block !important;
+        }
+      `;
+      document.head.appendChild(style);
+    }
   </script>
   <!-- Deck CSS Injections -->
   {% if deck.head and deck.head.styles %}
@@ -310,4 +326,68 @@ Here is an example of what your `config.json` might look like:
 </body>
 
 </html>
+```
+
+## Print Functionality
+
+The RevealPack template includes enhanced print functionality that extends Reveal.js's built-in print capabilities.
+
+### Print Modes
+
+The template supports two print modes through URL parameters:
+
+- **Normal Print**: `?print-pdf` - Standard Reveal.js print mode
+- **Show Hidden Elements**: `?print-pdf+show` - Shows elements with the `print-invisible` class
+
+### Print-Invisible Class
+
+The template includes CSS support for the `print-invisible` class, which hides elements during normal print mode:
+
+```css
+.print-invisible {
+  visibility: hidden !important;
+}
+```
+
+When using `?print-pdf+show`, these elements become visible in the printed output through additional CSS rules:
+
+```css
+html.print-pdf .reveal .slides .pdf-page section .print-invisible,
+html.reveal-print .reveal .slides .pdf-page section .print-invisible {
+  visibility: visible !important;
+  display: block !important;
+}
+```
+
+### Usage Examples
+
+**Hide speaker notes in normal print:**
+```html
+<aside class="notes print-invisible">
+  <p>Speaker notes that are hidden in print by default</p>
+</aside>
+```
+
+**Hide interactive elements:**
+```html
+<div class="print-invisible">
+  <button onclick="showAnswer()">Click to reveal answer</button>
+</div>
+```
+
+**Hide supplementary content:**
+```html
+<div class="print-invisible">
+  <p>Additional information for presentation only</p>
+</div>
+```
+
+### JavaScript Implementation
+
+The print functionality is implemented through JavaScript that:
+
+1. Parses URL parameters to detect print mode and show flag
+2. Dynamically loads appropriate CSS files (pdf.css or paper.css)
+3. Injects additional CSS rules when `+show` is present
+4. Ensures proper visibility of print-invisible elements in show mode
 ```

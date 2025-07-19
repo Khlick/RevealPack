@@ -295,13 +295,29 @@ def create_reveal_template():
 {add_offset_to_string(custom_css_tags, 8)}
         <!-- Custom Scripts -->
 {add_offset_to_string(custom_script_tags, 8)}
-        <!-- Print PDF script -->
+        <!-- Print PDF and Show logic -->
         <script>
-            var link = document.createElement('link');
+            const params = window.location.search.replace('?', '').split('+');
+            const hasPrintPDF = params.includes('print-pdf');
+            const hasShow = params.includes('show');
+
+            const link = document.createElement('link');
             link.rel = 'stylesheet';
             link.type = 'text/css';
-            link.href = window.location.search.match(/print-pdf/gi) ? './src/css/print/pdf.css' : './src/css/print/paper.css';
-            document.getElementsByTagName('head')[0].appendChild(link);
+            link.href = hasPrintPDF ? './src/css/print/pdf.css' : './src/css/print/paper.css';
+            document.head.appendChild(link);
+
+            if (hasPrintPDF && hasShow) {{
+                const style = document.createElement('style');
+                style.innerHTML = `
+                    html.print-pdf .reveal .slides .pdf-page section .print-invisible,
+                    html.reveal-print .reveal .slides .pdf-page section .print-invisible {{
+                        visibility: visible !important;
+                        display: block !important;
+                    }}
+                `;
+                document.head.appendChild(style);
+            }}
         </script>
         <!-- Deck CSS Injections -->
         {{% if deck.head and deck.head.styles %}}

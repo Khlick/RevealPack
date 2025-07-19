@@ -303,3 +303,64 @@ For a complete list of configuration options, see the [Configuration](config.md)
 
 For developers looking to contribute to RevealPack or customize it further, see the [Developer Guide](dev.md).
 
+## Print Functionality Examples
+
+RevealPack includes enhanced print functionality that allows you to control what content appears in printed versions of your presentations.
+
+### Basic Print Control
+
+Use the `print-invisible` class to hide elements during normal print mode:
+
+```html
+<div class="grid-wrapper">
+  <div class="header">
+    <h2>Interactive Quiz</h2>
+  </div>
+  <div class="content">
+    <p>What is the capital of France?</p>
+    
+    <!-- This button is hidden in normal print -->
+    <div class="print-invisible">
+      <button onclick="showAnswer()">Click to reveal answer</button>
+    </div>
+    
+    <!-- This answer is always visible -->
+    <p>The answer is Paris.</p>
+  </div>
+</div>
+```
+
+### Speaker Notes with Print Control
+
+Hide speaker notes in normal print but show them when needed:
+
+```html
+<section>
+  <h2>Key Concepts</h2>
+  <ul>
+    <li>Concept 1</li>
+    <li>Concept 2</li>
+    <li>Concept 3</li>
+  </ul>
+  
+  <!-- Speaker notes hidden in normal print -->
+  <aside class="notes print-invisible">
+    <p>Emphasize that these concepts build on each other</p>
+    <p>Ask students to think of real-world examples</p>
+  </aside>
+</section>
+```
+
+### Print Modes
+
+- **Normal Print**: `?print-pdf` - Standard print mode, hides `print-invisible` elements
+- **Show Hidden Elements**: `?print-pdf+show` - Shows all elements including those with `print-invisible` class
+
+### Use Cases
+
+1. **Speaker Notes**: Hide detailed speaker notes in normal print but show them when needed
+2. **Interactive Elements**: Hide buttons, forms, or other interactive elements that don't work in print
+3. **Supplementary Content**: Hide additional information that's only relevant during live presentation
+4. **Debug Information**: Hide development notes or debug information in final prints
+5. **Alternative Content**: Provide different content for print vs. presentation modes
+

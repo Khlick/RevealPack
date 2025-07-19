@@ -98,6 +98,34 @@ The `.grid-wrapper` class defines a responsive grid layout for the slide content
 
 `.pdf-page`: Adjusts the styles for PDF page output to ensure proper formatting.
 
+### Print Control
+
+`.print-invisible`: Hides elements during normal print mode (`?print-pdf`). Elements with this class become visible when using the `?print-pdf+show` URL parameter.
+
+**Usage:**
+```html
+<div class="print-invisible">
+  <p>This content is hidden in normal print mode</p>
+</div>
+```
+
+**CSS Implementation:**
+```css
+.print-invisible {
+  visibility: hidden !important;
+}
+```
+
+**Show Mode Override:**
+When using `?print-pdf+show`, the following CSS is automatically injected:
+```css
+html.print-pdf .reveal .slides .pdf-page section .print-invisible,
+html.reveal-print .reveal .slides .pdf-page section .print-invisible {
+  visibility: visible !important;
+  display: block !important;
+}
+```
+
 ## Emojis
 
 ### Icon for Any Unicode Character Emoji
