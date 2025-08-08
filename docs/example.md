@@ -63,10 +63,26 @@ cd /path/to/your/project
         "vizzy": {
           "version": "1.0.4",
           "url": "https://github.com/Khlick/Vizzy/releases/download/v1.0.4/vizzy.js"
+        },
+        "analytics": {
+          "version": "1.0.0",
+          "alias": "analytics-plugin",
+          "main": "analytics-main",
+          "export": "Analytics",
+          "noscript": true,
+          "omit": false
+        },
+        "tracking": {
+          "version": "1.0.0",
+          "alias": "tracking-plugin",
+          "main": "tracking-main",
+          "export": "Tracking",
+          "noscript": false,
+          "omit": true
         }
       },
       "plugin_configurations": {
-        "mathjax3": {
+        "mathjax4": {
           "mathjax": "https://cdn.jsdelivr.net/npm/mathjax@4.0.0-beta.6/tex-mml-chtml.js",
           "loader": {
             "load": ["[tex]/html"]

@@ -175,10 +175,17 @@ def create_reveal_template():
     external_plugins = config["packages"]["reveal_plugins"]["external"]
 
     # Create the list of built-in plugins
-    all_plugins = [f"src/plugin/{plugin}/{plugin}.js" for plugin in builtin_plugins]
+    all_plugins = []
+    for plugin in builtin_plugins:
+        # Built-in plugins don't have noscript/omit fields, so always include them
+        all_plugins.append(f"src/plugin/{plugin}/{plugin}.js")
 
     # Create the list of external plugins, using alias and main if they exist
     for plugin, details in external_plugins.items():
+        # Skip if noscript is true
+        if details.get("noscript", False):
+            continue
+            
         alias = details.get("alias", plugin)
         mainjs = details.get("main", plugin)
 
@@ -188,31 +195,48 @@ def create_reveal_template():
         all_plugins.append(f"src/plugin/{alias}/{mainjs}.js")
 
     # Generate plugin names for Reveal.initialize()
-    builtin_plugin_names = [
-        f"Reveal{plugin.capitalize()}" for plugin in builtin_plugins
-    ]
+    builtin_plugin_names = []
+    for plugin in builtin_plugins:
+        # Built-in plugins don't have omit field, so always include them
+        builtin_plugin_names.append(f"Reveal{plugin.capitalize()}")
     
     # Check if "RevealMath" is in the list
     if "RevealMath" in builtin_plugin_names:
         # Extract the plugin configurations from the config
         plugin_config = config["packages"]["reveal_plugins"].get("plugin_configurations", {})
 
-        # Check which key is present among "mathjax2", "mathjax3", or "katex"
-        if "mathjax2" in plugin_config:
-            replacement = "RevealMath.MathJax2"
-        elif "mathjax3" in plugin_config:
-            replacement = "RevealMath.MathJax3"
-        elif "katex" in plugin_config:
-            replacement = "RevealMath.KaTeX"
-        else:
-            # None of the keys were found; "RevealMath" is sufficient
-            replacement = "RevealMath"
+        # Enhanced MathJax processing - check for mathjax# pattern
+        mathjax_replacement = None
+        for key in plugin_config.keys():
+            if key.startswith("mathjax"):
+                # Extract the version number if present
+                version = key[7:] if len(key) > 7 else ""
+                if version in ["", "2", "3", "4"]:
+                    mathjax_replacement = f"RevealMath.MathJax{version}" if version else "RevealMath"
+                    break
+        
+        # Fallback to original logic if no mathjax# pattern found
+        if mathjax_replacement is None:
+            if "mathjax2" in plugin_config:
+                mathjax_replacement = "RevealMath.MathJax2"
+            elif "mathjax3" in plugin_config:
+                mathjax_replacement = "RevealMath.MathJax3"
+            elif "mathjax4" in plugin_config:
+                mathjax_replacement = "RevealMath.MathJax4"
+            elif "katex" in plugin_config:
+                mathjax_replacement = "RevealMath.KaTeX"
+            else:
+                # None of the keys were found; "RevealMath" is sufficient
+                mathjax_replacement = "RevealMath"
 
         # Modify the "RevealMath" entry in the builtin_plugin_names array
-        builtin_plugin_names[builtin_plugin_names.index("RevealMath")] = replacement
+        builtin_plugin_names[builtin_plugin_names.index("RevealMath")] = mathjax_replacement
 
     external_plugin_names = []
     for plugin, details in external_plugins.items():
+        # Skip if omit is true
+        if details.get("omit", False):
+            continue
         exportName = details.get("export", plugin.capitalize())
         external_plugin_names.append(exportName)
 

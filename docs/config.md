@@ -88,6 +88,8 @@ Additionally, the `alias` and `main` fields can be used to specify a different n
 - `alias`: Specifies the npm package name if it differs from the plugin name.
 - `main`: Specifies the main JavaScript file name if it differs from the plugin name. The `.js` extension is optional.
 - `export`: Specifies the name of the object created when importing the plugin if different from the plugin name.
+- `noscript`: When set to `true`, prevents the plugin script tag from being generated in the HTML template.
+- `omit`: When set to `true`, prevents the plugin from being listed in the Reveal.js plugin list in the HTML template.
 
 RevealPack will automatically cache downloaded plugins in the `directories.source.root` directory in a sub-folder `cached`. These plugins will be copied, unmodified, upon [`build`](build.md) and a reference will be generated with the expected relative reference:
 
@@ -126,6 +128,44 @@ In this example, the plugin will be referenced in the HTML as:
 ```html
 <script src="./src/plugin/vizzy-custom/vizzy-main.js"></script>
 ```
+
+### Enhanced MathJax Processing
+
+RevealPack includes enhanced MathJax processing that supports flexible version specification. When using the `math` built-in plugin, you can specify MathJax configurations using the `mathjax#` pattern where `#` can be empty, 2, 3, or 4.
+
+#### Configuration Examples
+
+```json
+{
+  "packages": {
+    "reveal_plugins": {
+      "built_in": ["math"],
+      "plugin_configurations": {
+        "mathjax": {
+          "mathjax": "https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"
+        },
+        "mathjax2": {
+          "mathjax": "https://cdn.jsdelivr.net/npm/mathjax@2.7.9/MathJax.js"
+        },
+        "mathjax3": {
+          "mathjax": "https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"
+        },
+        "mathjax4": {
+          "mathjax": "https://cdn.jsdelivr.net/npm/mathjax@4.0.0-beta.6/tex-mml-chtml.js"
+        }
+      }
+    }
+  }
+}
+```
+
+The system will automatically detect the `mathjax#` pattern and generate the appropriate plugin name:
+- `mathjax` → `RevealMath`
+- `mathjax2` → `RevealMath.MathJax2`
+- `mathjax3` → `RevealMath.MathJax3`
+- `mathjax4` → `RevealMath.MathJax4`
+
+This allows for flexible MathJax version configuration without strict validation of the version number.
 
 
 ### `custom_scripts`
