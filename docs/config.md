@@ -32,6 +32,9 @@ Reference the table below for configuration options parsed by the [`revealpack s
 | [`custom_scripts`](#custom_scripts) |                   | Array of custom JavaScript files to include in the presentation             |
 | `force_plugin_download`  |                              | Boolean to force re-download of plugins, even if they are already present   |
 | `reveal_configurations`  |                              | Configuration options for Reveal.js (see [Reveal configuration](https://revealjs.com/config/))|
+| `build_settings`         |                              | Configuration options for the build process                                  |
+|                          | `preserve_code_formatting`   | Boolean to preserve whitespace in code blocks (default: true)              |
+|                          | `html_indent_size`           | Number of spaces for HTML indentation (default: 2)                          |
 
 ## Specifications On Select Configurations
 
@@ -204,4 +207,27 @@ Example script tags inserted into the HTML template:
 By configuring `custom_scripts`, you can easily include custom functionality and extend your Reveal.js presentations with additional JavaScript code.
 
 To see a complete example for the configuration see [Template](template.md)
+
+### Build Settings
+
+The `build_settings` configuration allows you to control how the build process handles code formatting and whitespace preservation.
+
+#### Configuration
+
+```json
+{
+  "build_settings": {
+    "preserve_code_formatting": true,
+    "html_indent_size": 2
+  }
+}
+```
+
+#### Options
+
+- **`preserve_code_formatting`** (boolean, default: `true`): When enabled, preserves whitespace and indentation in code blocks (`<pre>` and `<code>` elements) during the build process. This ensures that code examples maintain their proper formatting without requiring HTML entities like `&#9;` for tabs.
+
+- **`html_indent_size`** (integer, default: `2`): Controls the number of spaces used for HTML indentation in the beautified output. This affects the overall HTML structure while preserving code block formatting.
+
+**Note**: These settings are enabled by default to provide the best user experience for code-heavy presentations. Disable `preserve_code_formatting` only if you have specific formatting requirements that conflict with whitespace preservation.
 

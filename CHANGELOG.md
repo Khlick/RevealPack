@@ -5,6 +5,92 @@ All notable changes to RevealPack will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.1] - 2024-12-19
+
+### Security
+- **Enhanced Tar Extraction Security**: Added `filter='data'` argument to all `tar.extractall()` calls
+- Prevents path traversal attacks through malicious tar archives
+- Eliminates deprecation warnings for Python 3.14 compatibility
+- Improves security when downloading and extracting external plugins
+
+### Technical Details
+- Modified `revealpack/setup.py` to use secure tar extraction methods
+- All tar archive extractions now explicitly filter for data files only
+- Maintains backward compatibility while improving security posture
+
+## [1.4.0] - 2024-12-19
+
+### Fixed
+- **Critical Bug Fix**: Fixed Jinja2 whitespace stripping that was destroying code block formatting in presentations
+- Users no longer need to use HTML entities like `&#9;` for tabs in code blocks
+- Code blocks now maintain proper indentation and structure during build process
+
+### Added
+- **New Build Settings Configuration**: Added `build_settings` section to `config.json`
+  - `preserve_code_formatting`: Controls whitespace preservation in code blocks (default: `true`)
+  - `html_indent_size`: Controls HTML indentation size (default: `2`)
+- **Enhanced HTML Beautification**: Improved `beautify_html` function to intelligently preserve code formatting
+- **Better Asset Management**: Enhanced asset copying with improved exclusion patterns and recursive handling
+
+### Changed
+- **Jinja2 Environment**: Modified template rendering to preserve code formatting by default
+- **Build Process**: Code formatting preservation is now enabled by default for better user experience
+- **Configuration**: New build settings provide granular control over formatting behavior
+
+### Technical Details
+- Modified `revealpack/build.py` to respect `build_settings.preserve_code_formatting`
+- Enhanced `revealpack/_utils/html_operations.py` with smart code block preservation
+- Updated documentation in `docs/config.md` with new configuration options
+- All changes are backward compatible with existing presentations
+
+## [1.3.7] - 2024-12-19
+
+### Added
+- **Enhanced Plugin Configuration**: Added support for `noscript` and `omit` fields in plugin configurations
+  - `noscript`: Allows plugins to be loaded without JavaScript wrapper
+  - `omit`: Enables conditional plugin loading based on configuration
+- **Flexible MathJax Processing**: Improved handling of MathJax configurations
+  - Better support for custom MathJax configurations
+  - More reliable loading of MathJax components
+  - Enhanced error handling for MathJax initialization
+
+### Changed
+- **Plugin Loading System**: Refactored plugin loading mechanism
+  - More granular control over how plugins are included
+  - Improved error handling for plugin loading failures
+  - Better support for plugins with special loading requirements
+
+### Technical Details
+- Modified plugin parsing logic in `revealpack/build.py`
+- Enhanced MathJax configuration handling in templates
+- Updated documentation to reflect new plugin configuration options
+- All changes maintain backward compatibility with existing presentations
+
+## [1.3.6] - 2024-12-19
+
+### Fixed
+- Resolved path handling issues in Windows environments
+- Fixed plugin dependency resolution order
+
+## [1.3.5] - 2024-12-19
+
+### Added
+- Better error messages for plugin loading failures
+- Improved logging for build process
+
+## [1.3.4] - 2024-12-19
+
+### Fixed
+- Corrected plugin path resolution for nested configurations
+- Fixed CSS loading order issues
+
+## [1.3.3] - 2024-12-19
+
+### Changed
+- Optimized plugin loading performance
+- Improved error handling for malformed plugin configurations
+
+
 ## [1.3.2] - 2024-12-19
 
 ### Fixed

@@ -47,13 +47,16 @@ The `build` command is responsible for converting slide decks located in the spe
 7. **Compile Theme:**
    If the specified theme is provided as an SCSS/SASS file, it is compiled into a CSS file using the Dart Sass CLI. If a pre-compiled CSS file is provided, it is used directly. **Note:** SCSS/SASS compilation requires Dart Sass to be installed and available in the system PATH.
 
-8. **Copy Reveal.js Files:**
+8. **Copy Assets:**
+   All contents from the `assets/` directory are copied directly to the build root directory, excluding any patterns specified in the exclusion list (such as the `styles/` directory which is handled separately).
+
+9. **Copy Reveal.js Files:**
    Relevant Reveal.js files are copied from the cached directory to the build directory, ensuring the necessary JavaScript and CSS files are available for the presentations.
 
-9. **Generate Presentations:**
+10. **Generate Presentations:**
    The `build` command processes each subdirectory within the presentation root directory, treating each as a separate presentation. It reads any `presentation.json` files for metadata or defaults to parsing HTML files alphabetically.
 
-10. **Generate Table of Contents (TOC):**
+11. **Generate Table of Contents (TOC):**
     A table of contents (`index.html`) is generated in the build directory, providing links to all built presentations.
 
 #### Expected Behavior
@@ -98,6 +101,8 @@ The following `config.json` options are relevant to the `build` command:
 - **theme:** The path to the theme file, which can be an SCSS/SASS file or a pre-compiled CSS file.
 
 - **custom_scripts:** A list of custom JavaScript scripts to include in the presentations.
+
+- **asset_exclusions:** A list of regex patterns for excluding files/directories from asset copying.
 
 - **toc_template:** The path to the template file for the table of contents.
 

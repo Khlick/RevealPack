@@ -107,3 +107,6 @@ config.yaml
 
 # tools
 .tools/
+
+# build
+poetry.lock

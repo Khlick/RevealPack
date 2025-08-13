@@ -277,6 +277,77 @@ def copy_and_compile_styles():
 
     logging.info("Styles copied and compiled successfully.")
 
+
+def copy_assets():
+    """Copy non-excluded assets from the assets directory to the build root."""
+    logging.info("Copying assets...")
+    
+    source_root = Path(config["directories"]["source"]["root"])
+    assets_dir = source_root.parent / 'assets'
+    build_root = Path(config["directories"]["build"])
+    
+    # Define base exclusion patterns (regex-based)
+    # These patterns will exclude files/directories from being copied
+    base_exclusion_patterns = [
+        r"^styles$",           # Exclude the styles directory (handled separately)
+        r"^\.git",             # Exclude git-related files
+        r"^\.DS_Store$",       # Exclude macOS system files
+        r"^Thumbs\.db$",       # Exclude Windows thumbnail files
+        r"\.tmp$",             # Exclude temporary files
+        r"\.log$",             # Exclude log files
+    ]
+    
+    # Get additional exclusions from config
+    config_exclusions = config.get("asset_exclusions", [])
+    
+    # Combine base patterns with config patterns
+    exclusion_patterns = base_exclusion_patterns + config_exclusions
+    
+    # Log the exclusion patterns being used
+    if config_exclusions:
+        logging.info(f"Using {len(config_exclusions)} additional asset exclusion patterns from config")
+        for pattern in config_exclusions:
+            logging.debug(f"  Config exclusion: {pattern}")
+    else:
+        logging.debug("No additional asset exclusions found in config")
+    
+    def should_exclude(path):
+        """Check if a path should be excluded based on exclusion patterns."""
+        path_str = str(path)
+        for pattern in exclusion_patterns:
+            if re.search(pattern, path_str):
+                logging.debug(f"Excluding {path_str} (matches pattern: {pattern})")
+                return True
+        return False
+    
+    def copy_assets_recursive(src_path, dest_path):
+        """Recursively copy assets, respecting exclusions."""
+        if should_exclude(src_path):
+            return
+        
+        if src_path.is_file():
+            # Copy file if not excluded
+            dest_path.parent.mkdir(parents=True, exist_ok=True)
+            copy_file_if_different(str(src_path), str(dest_path))
+            logging.debug(f"Copied asset: {src_path} -> {dest_path}")
+        elif src_path.is_dir():
+            # Create destination directory and process contents
+            dest_path.mkdir(parents=True, exist_ok=True)
+            for item in src_path.iterdir():
+                if not should_exclude(item):
+                    copy_assets_recursive(item, dest_path / item.name)
+    
+    # Check if assets directory exists
+    if not assets_dir.exists():
+        logging.info("No assets directory found, skipping asset copy.")
+        return
+    
+    # Start recursive copy from assets directory to build root
+    copy_assets_recursive(assets_dir, build_root)
+    
+    logging.info("Assets copied successfully.")
+
+
 def compile_theme():
     """Compile the SCSS/SASS theme into CSS."""
     logging.info("Compiling theme...")
@@ -466,11 +537,15 @@ def generate_presentation(decks=None):
     rendered_presentations = []
 
     # Create a Jinja2 environment and add the custom filter
+    # Check if we should preserve code formatting (default to True for better UX)
+    preserve_code_formatting = config.get("build_settings", {}).get("preserve_code_formatting", True)
+    
     env = Environment(
         loader=FileSystemLoader("."),
         autoescape=select_autoescape(),
-        trim_blocks=True,
-        lstrip_blocks=True,
+        # Only apply whitespace stripping if explicitly disabled by user
+        trim_blocks=not preserve_code_formatting,
+        lstrip_blocks=not preserve_code_formatting,
     )
     env.filters["to_html_attrs"] = dict_to_html_attrs
 
@@ -573,7 +648,9 @@ def generate_presentation(decks=None):
         output_path = os.path.join(config["directories"]["build"], pres_link)
         
         with open(output_path, "w") as f:
-            f.write(beautify_html(presentation['html'], 2))
+            # Apply HTML beautification with code formatting preservation
+            beautify_indent = config.get("build_settings", {}).get("html_indent_size", 2)
+            f.write(beautify_html(presentation['html'], beautify_indent))
 
         # Add to TOC data
         presentations_for_toc.append({
@@ -702,11 +779,14 @@ if __name__ == "__main__":
     # Step 3: Compile styles
     copy_and_compile_styles()
     
-    # Step 4: Compile theme
+    # Step 4: Copy assets
+    copy_assets()
+    
+    # Step 5: Compile theme
     compile_theme()
 
-    # Step 5: Copy over Reveal.js files
+    # Step 6: Copy over Reveal.js files
     copy_reveal()
 
-    # Step 6: Generate presentation
+    # Step 7: Generate presentation
     generate_presentation(decks=decks_to_build)

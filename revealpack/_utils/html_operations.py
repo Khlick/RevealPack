@@ -17,13 +17,31 @@ def beautify_html(html_str, indent_size=2):
     """
     Beautify an HTML string using BeautifulSoup's prettify method.
     """
-    lines = html_str.split("\n")
-    stripped_lines = [line.strip() for line in lines]
-    cleaned_html = "\n".join(stripped_lines)
-
+    # Parse the HTML with BeautifulSoup
+    soup = BeautifulSoup(html_str, "html.parser")
+    
+    # Find all <pre> and <code> elements to preserve their formatting
+    code_elements = soup.find_all(['pre', 'code'])
+    
+    # Store original content of code elements
+    code_content_map = {}
+    for i, element in enumerate(code_elements):
+        code_content_map[i] = element.get_text()
+    
+    # Use BeautifulSoup's prettify with custom formatter
     formatter = HTMLFormatter(indent=indent_size)
-    soup = BeautifulSoup(cleaned_html, "html.parser")
-    return soup.prettify(formatter=formatter)
+    beautified_html = soup.prettify(formatter=formatter)
+    
+    # Restore original code content to preserve formatting
+    soup_beautified = BeautifulSoup(beautified_html, "html.parser")
+    code_elements_restored = soup_beautified.find_all(['pre', 'code'])
+    
+    for i, element in enumerate(code_elements_restored):
+        if i < len(code_elements):
+            # Replace the beautified content with original content
+            element.string = code_content_map[i]
+    
+    return str(soup_beautified)
 
 # -----------------------------------------------------------------------------
 # SCSS compilation using Dart Sass CLI

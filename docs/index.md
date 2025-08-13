@@ -19,6 +19,7 @@ With RevealPack, you can:
 - [`build`](build.md): Build the presentations.
 - [`serve`](serve.md): Serve the presentations locally.
 - [`package`](package.md): Package the presentation for distribution.
+- [`assets`](assets.md): Manage presentation assets.
 - `docs`: View the documentation.
 
 ## Installation
@@ -59,7 +60,7 @@ revealpack setup
 
 ### Presentation Development Workflow
 
-- **Build Presentations**: Use `revealpack build` to compile your presentations.
+- **Build Presentations**: Use `revealpack build` to compile your presentations. The build process automatically copies assets from the `assets/` directory to the build output, with configurable exclusions for unwanted files.
 
 ```bash
 revealpack build

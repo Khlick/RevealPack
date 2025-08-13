@@ -91,7 +91,7 @@ def download_and_install_packages():
                         fileobj=BytesIO(response.content), mode="r:gz"
                     ) as tar:
                         extracted_folder = tar.getmembers()[0].name.split("/")[0]
-                        tar.extractall(path=cached_dir)
+                        tar.extractall(path=cached_dir, filter='data')
                 elif file_ext == "zip":
                     with zipfile.ZipFile(BytesIO(response.content), "r") as zip_ref:
                         extracted_folder = zip_ref.namelist()[0].split("/")[0]
@@ -130,7 +130,7 @@ def download_and_install_packages():
                 with tarfile.open(
                     fileobj=BytesIO(response.content), mode="r:gz"
                 ) as tar:
-                    tar.extractall(path=cached_dir)
+                    tar.extractall(path=cached_dir, filter='data')
                 extracted_folder = "package"
 
                 extracted_path = os.path.join(cached_dir, extracted_folder)

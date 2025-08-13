@@ -2,7 +2,7 @@ import os
 import json
 import shutil
 
-__version__ = "1.3.7"
+__version__ = "1.4.1"
 __description__ = f"RevealPack v{__version__} - A CLI tool for managing Reveal.js presentation packages"
 
 def copy_file_or_directory(src, dest):
@@ -114,7 +114,8 @@ def generate_config(destination):
             "margin": 0.081,
             "minScale": 0.1,
             "maxScale": 1.56,
-        }
+        },
+        "asset_exclusions": []
     }
 
     # Determine the path to save the config.json file
