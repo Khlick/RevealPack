@@ -20,7 +20,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 1
           fetch-tags: true
 
       - name: Set up Python
@@ -57,17 +57,24 @@ jobs:
         id: tag_message
         shell: bash
         run: |
-          TAG_NAME="${GITHUB_REF#refs/tags/}"
-          TAG_MSG="$(git for-each-ref "refs/tags/${TAG_NAME}" --format="%(contents)")"
-          if [ -z "$TAG_MSG" ]; then
-            TAG_MSG="$(git log -1 --format=%B "$GITHUB_SHA")"
+          TAG_NAME="${GITHUB_REF_NAME:-${GITHUB_REF#refs/tags/}}"
+          git fetch --depth=1 origin +refs/tags/*:refs/tags/*
+          if [ "$(git cat-file -t "refs/tags/${TAG_NAME}")" != "tag" ]; then
+            echo "The tag ${TAG_NAME} is lightweight, so there is no annotation message."
+            FALLBACK_MSG="$(git log -1 --format=%B "${GITHUB_SHA}")"
+            {
+              echo 'TAG_MESSAGE<<EOF'
+              echo "$FALLBACK_MSG"
+              echo EOF
+            } >> "$GITHUB_ENV"
+            exit 0
           fi
+          TAG_MSG="$(git for-each-ref "refs/tags/${TAG_NAME}" --format="%(contents)")"
           {
             echo 'TAG_MESSAGE<<EOF'
             echo "$TAG_MSG"
             echo EOF
-          } >> "$GITHUB_ENV"
-      
+          }
 
       - name: Create Release and Upload Assets
         uses: softprops/action-gh-release@v2
