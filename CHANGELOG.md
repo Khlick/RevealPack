@@ -5,6 +5,21 @@ All notable changes to RevealPack will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.5] - 2024-12-19
+
+### Changed
+- **Dependency Cleanup**: Optimized package dependencies for better user experience
+  - Removed unused `flask` dependency that was not being utilized
+  - Moved `mkdocs` and `mkdocs-material` to development dependencies
+  - Reduced package size for end users while maintaining all functionality
+  - Documentation building capabilities preserved for development workflows
+
+### Technical Details
+- Modified `pyproject.toml` to remove unused runtime dependencies
+- Moved documentation build tools to appropriate dev dependency section
+- All core functionality remains unchanged and backward compatible
+- Package is now lighter and more focused on essential runtime requirements
+
 ## [1.4.4] - 2024-12-19
 
 ### Fixed

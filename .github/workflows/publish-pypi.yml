@@ -19,6 +19,9 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -52,11 +55,19 @@ jobs:
 
       - name: Get tag message
         id: tag_message
+        shell: bash
         run: |
-          TAG_NAME=${GITHUB_REF#refs/tags/}
-          echo "TAG_MESSAGE<<EOF" >> $GITHUB_ENV
-          git tag -l --format='%(contents:subject)%0a%0a%(contents:body)' $TAG_NAME >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
+          TAG_NAME="${GITHUB_REF#refs/tags/}"
+          TAG_MSG="$(git for-each-ref "refs/tags/${TAG_NAME}" --format="%(contents)")"
+          if [ -z "$TAG_MSG" ]; then
+            TAG_MSG="$(git log -1 --format=%B "$GITHUB_SHA")"
+          fi
+          {
+            echo 'TAG_MESSAGE<<EOF'
+            echo "$TAG_MSG"
+            echo EOF
+          } >> "$GITHUB_ENV"
+      
 
       - name: Create Release and Upload Assets
         uses: softprops/action-gh-release@v2
