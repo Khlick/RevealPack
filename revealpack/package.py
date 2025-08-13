@@ -73,7 +73,7 @@ def create_package_json(config, dest_dir):
         }
     }
     package_json_path = os.path.join(dest_dir, 'package.json')
-    with open(package_json_path, 'w') as f:
+    with open(package_json_path, 'w', encoding='utf-8') as f:
         json.dump(package_json, f, indent=2)
     logging.info(f"Created package.json at {package_json_path}")
 
@@ -154,7 +154,7 @@ bower_components/
 *.lock
 """
     gitignore_path = os.path.join(dest_dir, '.gitignore')
-    with open(gitignore_path, 'w') as f:
+    with open(gitignore_path, 'w', encoding='utf-8') as f:
         f.write(gitignore_content)
     logging.info(f"Created .gitignore at {gitignore_path}")
 
@@ -241,7 +241,7 @@ jobs:
 """
     workflow_path = os.path.join(dest_dir, '.github', 'workflows', 'build-and-release.yml')
     os.makedirs(os.path.dirname(workflow_path), exist_ok=True)
-    with open(workflow_path, 'w') as f:
+    with open(workflow_path, 'w', encoding='utf-8') as f:
         f.write(workflow_content)
     logging.info(f"Created GitHub workflow file at {workflow_path}")
 
@@ -295,7 +295,7 @@ app.on('activate', () => {
 
 """
     main_js_path = os.path.join(dest_dir, 'main.js')
-    with open(main_js_path, 'w') as f:
+    with open(main_js_path, 'w', encoding='utf-8') as f:
         f.write(main_js_content)
     logging.info(f"Created main.js at {main_js_path}")
 
@@ -308,7 +308,7 @@ def create_readme(config,dest_dir):
 See releases for the current version for MacOS and Windows operating systems.
 """
     readme_path = os.path.join(dest_dir,"README.md")
-    with open (readme_path,'w') as f:
+    with open(readme_path, 'w', encoding='utf-8') as f:
         f.write(readme_content)
     logging.info(f"Created README.md at {readme_path}")
 
@@ -357,7 +357,7 @@ def copy_build_output(build_src_dir, target_src_dir):
 def update_or_create_package(config, target_dir):
     package_json_path = os.path.join(target_dir, 'package.json')
     if os.path.exists(package_json_path):
-        with open(package_json_path, 'r+') as f:
+        with open(package_json_path, 'r+', encoding='utf-8') as f:
             existing_package_json = json.load(f)
             
             # Update the fields with new values from config, if they exist

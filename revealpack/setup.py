@@ -463,7 +463,7 @@ def create_reveal_template():
 """
 
     reveal_template_path = source_root / config["reveal_template"]
-    with reveal_template_path.open("w") as f:
+    with reveal_template_path.open("w", encoding="utf-8") as f:
         f.write(reveal_template)
 
     logging.info(f"Reveal template created at {reveal_template_path}")
@@ -654,7 +654,7 @@ def create_toc_template():
     toc_template_path = os.path.join(
         config["directories"]["source"]["root"], config["toc_template"]
     )
-    with open(toc_template_path, "w") as f:
+    with open(toc_template_path, "w", encoding="utf-8") as f:
         f.write(toc_template_content)
 
     logging.info(f"TOC template created at {toc_template_path}")

@@ -6,7 +6,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "RevealPack"
-version = "1.4.1"
+version = "1.4.4"
 description = "A CLI tool for managing Reveal.js presentation packages"
 authors = ["Khris Griffis, Ph.D. <khris.griffis.phd@gmail.com>"]
 license = "MIT"

@@ -2,8 +2,8 @@ import os
 import json
 import shutil
 
-__version__ = "1.4.1"
-__description__ = f"RevealPack v{__version__} - A CLI tool for managing Reveal.js presentation packages"
+__version__ = "1.4.4"
+__description__ = "RevealPack - A CLI tool for managing Reveal.js presentation packages"
 
 def copy_file_or_directory(src, dest):
     """Copy a file or directory to the specified destination."""
@@ -125,7 +125,7 @@ def generate_config(destination):
         config_path = "config.json"
 
     # Write the config data to the config.json file
-    with open(config_path, 'w') as config_file:
+    with open(config_path, 'w', encoding='utf-8') as config_file:
         json.dump(config_data, config_file, indent=4)
 
 def copy_config_and_assets(destination=None):

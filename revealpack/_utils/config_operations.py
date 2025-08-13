@@ -8,7 +8,7 @@ def read_config(target_dir):
     """Read the config.json file from the target directory and return the configuration."""
     config_path = os.path.join(target_dir, "config.json")
     try:
-        with open(config_path, "r") as f:
+        with open(config_path, "r", encoding="utf-8") as f:
             config = json.load(f)
         return config
     except FileNotFoundError:
@@ -25,7 +25,24 @@ def initialize_logging(config, log_level=None):
         log_level = log_level.upper()
     else:
         log_level = config.get("logging", "info").upper()
-    logging.basicConfig(level=getattr(logging, log_level, logging.INFO))
+    
+    # Get the numeric log level, defaulting to INFO if invalid
+    numeric_level = getattr(logging, log_level, logging.INFO)
+    
+    # Configure root logger to ensure the level is set
+    root_logger = logging.getLogger()
+    root_logger.setLevel(numeric_level)
+    
+    # If no handlers exist, create a basic one
+    if not root_logger.handlers:
+        handler = logging.StreamHandler()
+        formatter = logging.Formatter('%(levelname)s: %(message)s')
+        handler.setFormatter(formatter)
+        root_logger.addHandler(handler)
+    else:
+        # Update existing handlers to respect the new level
+        for handler in root_logger.handlers:
+            handler.setLevel(numeric_level)
 
 
 def write_config(target_dir, property_name, property_value, force=False):
@@ -34,7 +51,7 @@ def write_config(target_dir, property_name, property_value, force=False):
 
     try:
         # Read the existing configuration
-        with open(config_path, "r") as f:
+        with open(config_path, "r", encoding="utf-8") as f:
             config = json.load(f)
 
         # Split the property_name into parts to handle nested properties
@@ -69,7 +86,7 @@ def write_config(target_dir, property_name, property_value, force=False):
                 sys.exit(1)
 
         # Write the updated configuration back to the file
-        with open(config_path, "w") as f:
+        with open(config_path, "w", encoding="utf-8") as f:
             json.dump(config, f, indent=4)
         logging.info(f"Property {property_name} updated successfully.")
 

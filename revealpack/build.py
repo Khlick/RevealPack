@@ -587,7 +587,7 @@ def generate_presentation(decks=None):
         # Check for presentation.json
         presentation_json_path = os.path.join(presentation_path, "presentation.json")
         if os.path.exists(presentation_json_path):
-            with open(presentation_json_path, "r") as f:
+            with open(presentation_json_path, "r", encoding="utf-8") as f:
                 presentation_data = json.load(f)
             deck.update(presentation_data)
 
@@ -647,7 +647,7 @@ def generate_presentation(decks=None):
         pres_link = f"{presentation['folder']}.html"
         output_path = os.path.join(config["directories"]["build"], pres_link)
         
-        with open(output_path, "w") as f:
+        with open(output_path, "w", encoding="utf-8") as f:
             # Apply HTML beautification with code formatting preservation
             beautify_indent = config.get("build_settings", {}).get("html_indent_size", 2)
             f.write(beautify_html(presentation['html'], beautify_indent))
@@ -706,7 +706,7 @@ def generate_toc(presentations, template, target, project_title):
 
     # Save the rendered HTML to the target directory
     target_path = os.path.join(target, "index.html")
-    with open(target_path, "w") as f:
+    with open(target_path, "w", encoding="utf-8") as f:
         f.write(rendered_toc)
 
     logging.info(f"Generated TOC and saved at {target_path}")

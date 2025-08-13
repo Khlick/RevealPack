@@ -5,6 +5,23 @@ All notable changes to RevealPack will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.4] - 2024-12-19
+
+### Fixed
+- **Logging Configuration**: Fixed issue where logging level set in `config.json` was being ignored
+  - Modified `initialize_logging` function to properly set root logger level
+  - Ensures logging configuration from config file is always respected
+  - Improved handler management for consistent logging behavior
+- **Unicode Encoding**: Fixed `UnicodeEncodeError` when writing HTML files with special characters
+  - Added `encoding="utf-8"` to all file operations throughout the codebase
+  - Resolves issues with characters like '\u2753' that couldn't be encoded in Windows-1252
+  - Ensures proper handling of international characters and emojis in presentations
+
+### Technical Details
+- Modified `revealpack/_utils/config_operations.py` for proper logging initialization
+- Updated file operations in `revealpack/build.py`, `revealpack/package.py`, `revealpack/setup.py`, `revealpack/__init__.py`, and `revealpack/_utils/file_operations.py`
+- All changes maintain backward compatibility and improve cross-platform reliability
+
 ## [1.4.1] - 2024-12-19
 
 ### Security

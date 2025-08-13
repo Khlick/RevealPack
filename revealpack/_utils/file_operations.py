@@ -143,7 +143,7 @@ def get_delimiter_from_file(file_path: str) -> str:
         return '\t'
     
     try:
-        with open(file_path, 'r') as csvfile:
+        with open(file_path, 'r', encoding='utf-8') as csvfile:
             # If not csv/tsv, try to detect delimiter
             content = csvfile.read()
             delimiter = str(csv.Sniffer().sniff(content).delimiter)
@@ -163,7 +163,7 @@ def parse_delimited_file(file_path: str) -> list:
     delimiter = get_delimiter_from_file(file_path)
     value_list = []
     try:
-        with open(file_path, 'r') as csvfile:
+        with open(file_path, 'r', encoding='utf-8') as csvfile:
             reader = csv.reader(csvfile, delimiter=delimiter)
             for row in reader:
                 # Extend the value_list
