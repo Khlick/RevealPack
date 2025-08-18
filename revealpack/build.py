@@ -289,10 +289,10 @@ def copy_assets():
     # Define base exclusion patterns (regex-based)
     # These patterns will exclude files/directories from being copied
     base_exclusion_patterns = [
-        r"^styles$",           # Exclude the styles directory (handled separately)
-        r"^\.git",             # Exclude git-related files
-        r"^\.DS_Store$",       # Exclude macOS system files
-        r"^Thumbs\.db$",       # Exclude Windows thumbnail files
+        r"styles",             # Exclude the styles directory (handled separately)
+        r"\.git",              # Exclude git-related files
+        r"\.DS_Store",         # Exclude macOS system files
+        r"Thumbs\.db",         # Exclude Windows thumbnail files
         r"\.tmp$",             # Exclude temporary files
         r"\.log$",             # Exclude log files
     ]
@@ -314,10 +314,19 @@ def copy_assets():
     def should_exclude(path):
         """Check if a path should be excluded based on exclusion patterns."""
         path_str = str(path)
+        path_name = path.name  # Get just the filename/directory name
+        
         for pattern in exclusion_patterns:
-            if re.search(pattern, path_str):
-                logging.debug(f"Excluding {path_str} (matches pattern: {pattern})")
-                return True
+            # For patterns that end with $ (file extensions), check against the full path
+            if pattern.endswith('$'):
+                if re.search(pattern, path_str):
+                    logging.debug(f"Excluding {path_str} (path matches pattern: {pattern})")
+                    return True
+            # For other patterns (directory names, filenames), check against the name only
+            else:
+                if re.search(pattern, path_name):
+                    logging.debug(f"Excluding {path_str} (name matches pattern: {pattern})")
+                    return True
         return False
     
     def copy_assets_recursive(src_path, dest_path):

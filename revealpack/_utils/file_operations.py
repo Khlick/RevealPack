@@ -4,6 +4,7 @@ import filecmp
 import logging
 import fnmatch
 import csv
+import re
 from pathlib import Path
 
 ignore = ["*.DS_Store", "*.ffs_db", "__pycache__"]
@@ -159,15 +160,20 @@ def get_delimiter_from_file(file_path: str) -> str:
         raise
 
 def parse_delimited_file(file_path: str) -> list:
-    """Reads a file and returns a list of values based on the detected delimiter."""
+    """Reads a file and returns a list of values using regex to parse quoted CSV."""
     delimiter = get_delimiter_from_file(file_path)
     value_list = []
     try:
         with open(file_path, 'r', encoding='utf-8') as csvfile:
-            reader = csv.reader(csvfile, delimiter=delimiter)
-            for row in reader:
-                # Extend the value_list
-                value_list.extend([value.strip() for value in row if value.strip()])
+            content = csvfile.read().strip()
+            
+            # Use regex to find quoted strings
+            pattern = r'"([^"]*)"'
+            matches = re.findall(pattern, content)
+            
+            for match in matches:
+                value_list.append(match)
+        
         logging.info(f"Successfully parsed {len(value_list)} element(s) from file '{file_path}'.")
     except FileNotFoundError:
         logging.error(f"File not found: {file_path}")
