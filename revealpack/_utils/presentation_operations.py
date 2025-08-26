@@ -80,9 +80,15 @@ def parse_slide(file_path):
         attributes = {}
     # Validate and extract 'sectiontitle' if it exists
     sectiontitle = validate_and_extract_sectiontitle(attributes)
-    result = {"attributes": attributes, "content": "\n".join(content)}
+    # Fix: strip trailing newlines from each line before joining to prevent double newlines
+    result = {"attributes": attributes, "content": "".join(content)}
     if sectiontitle:
         result["sectiontitle"] = sectiontitle
+
+    # Debug logging to help identify newline issues
+    if logging.getLogger().isEnabledFor(logging.DEBUG):
+        content_preview = result["content"][:200] + "..." if len(result["content"]) > 200 else result["content"]
+        logging.debug(f"  Content preview for {file_path}: {repr(content_preview)}")
 
     return result
 

@@ -23,23 +23,25 @@ def beautify_html(html_str, indent_size=2):
     # Find all <pre> and <code> elements to preserve their formatting
     code_elements = soup.find_all(['pre', 'code'])
     
-    # Store original content of code elements
+    # Store original content of code elements with proper newline handling
     code_content_map = {}
     for i, element in enumerate(code_elements):
-        code_content_map[i] = element.get_text()
+        # Get the raw HTML content to preserve exact formatting
+        code_content_map[i] = str(element)
     
     # Use BeautifulSoup's prettify with custom formatter
     formatter = HTMLFormatter(indent=indent_size)
     beautified_html = soup.prettify(formatter=formatter)
     
-    # Restore original code content to preserve formatting
+    # Restore original code content to preserve formatting exactly
     soup_beautified = BeautifulSoup(beautified_html, "html.parser")
     code_elements_restored = soup_beautified.find_all(['pre', 'code'])
     
     for i, element in enumerate(code_elements_restored):
         if i < len(code_elements):
-            # Replace the beautified content with original content
-            element.string = code_content_map[i]
+            # Replace the entire element with the original to preserve formatting exactly
+            original_element = BeautifulSoup(code_content_map[i], "html.parser")
+            element.replace_with(original_element.find(['pre', 'code']))
     
     return str(soup_beautified)
 

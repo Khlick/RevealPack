@@ -5,6 +5,21 @@ All notable changes to RevealPack will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.6] - 2024-12-19
+
+### Fixed
+- **Critical Newline Issue**: Fixed HTML parsing that was adding extra blank lines between code block lines
+  - Resolved issue where `\n` was being interpreted as `\n\n` in HTML slide content
+  - Code blocks now maintain proper formatting without extra blank lines
+  - highlight.js will parse code correctly without spacing issues
+  - Improved HTML beautification to preserve exact code block formatting
+
+### Technical Details
+- Modified `revealpack/_utils/presentation_operations.py` to fix newline handling in `parse_slide` function
+- Enhanced `revealpack/_utils/html_operations.py` to better preserve code block HTML content
+- Fixed root cause where `readlines()` + `"\n".join()` was creating double newlines
+- All changes maintain backward compatibility and improve code block rendering quality
+
 ## [1.4.5] - 2024-12-19
 
 ### Changed
