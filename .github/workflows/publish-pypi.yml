@@ -20,7 +20,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 1
+          fetch-depth: 0
           fetch-tags: true
 
       - name: Set up Python
@@ -58,7 +58,6 @@ jobs:
         shell: bash
         run: |
           TAG_NAME="${GITHUB_REF_NAME:-${GITHUB_REF#refs/tags/}}"
-          git fetch --depth=1 origin +refs/tags/*:refs/tags/*
           if [ "$(git cat-file -t "refs/tags/${TAG_NAME}")" != "tag" ]; then
             echo "The tag ${TAG_NAME} is lightweight, so there is no annotation message."
             FALLBACK_MSG="$(git log -1 --format=%B "${GITHUB_SHA}")"
