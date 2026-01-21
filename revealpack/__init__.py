@@ -2,7 +2,7 @@ import os
 import json
 import shutil
 
-__version__ = "1.4.6"
+__version__ = "1.4.7"
 __description__ = "RevealPack - A CLI tool for managing Reveal.js presentation packages"
 
 def copy_file_or_directory(src, dest):

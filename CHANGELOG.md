@@ -5,6 +5,20 @@ All notable changes to RevealPack will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.7] - 2024-12-19
+
+### Fixed
+- **Highlight.js Theme Handling**: Fixed issue where setup would fail when `highlight_theme` config option was set but the CSS file wasn't found
+  - Initialized `highlight_css` variable before the file search loop to prevent `NameError`
+  - Changed condition check from truthy evaluation to explicit `is not None` check
+  - Added proper fallback HTML comment when highlight theme CSS is not found
+  - Setup now gracefully handles missing highlight theme files and defaults to 'monokai' with appropriate warning
+
+### Technical Details
+- Modified `revealpack/setup.py` in `create_reveal_template()` function
+- Improved error handling for highlight.js theme configuration
+- All changes maintain backward compatibility
+
 ## [1.4.6] - 2024-12-19
 
 ### Fixed

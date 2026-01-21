@@ -263,13 +263,14 @@ def create_reveal_template():
         ]
 
         # Find the highlight CSS file
+        highlight_css = None
         for path in paths_to_check:
             if path.exists():
                 highlight_css = path.name
                 highlight_css_path = path
                 break
 
-        if highlight_css:
+        if highlight_css is not None:
             highlight_str = "\n".join(
                 [
                     "<!-- highlight.js theme -->",
@@ -283,6 +284,12 @@ def create_reveal_template():
                 force=True
                 )
         else:
+            highlight_str = "\n".join(
+                [
+                    "<!-- highlight.js theme -->",
+                    "<!-- Using default highlight.js theme 'monokai'. -->",
+                ]
+            )
             logging.warning("Highlight theme CSS not found. Defaulting to 'monokai'.")
 
     # Parse config["custom_css"] array and insert the stylesheet links into the template
