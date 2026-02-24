@@ -106,6 +106,8 @@ The following `config.json` options are relevant to the `build` command:
 
 - **toc_template:** The path to the template file for the table of contents.
 
+- **favicon:** Optional. When set to a path relative to the libraries directory (e.g., `favicon.png`), a favicon link is included in the reveal and TOC templates; when `null` or omitted, no favicon link is emitted.
+
 ### Note on Presentation Structure
 
 In the `<project root>/config.directories.source.root/config.directories.source.presentation_root` directory, each subdirectory is treated as a separate presentation. Each presentation directory may contain:

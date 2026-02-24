@@ -2,7 +2,7 @@ import os
 import json
 import shutil
 
-__version__ = "1.4.7"
+__version__ = "1.4.8"
 __description__ = "RevealPack - A CLI tool for managing Reveal.js presentation packages"
 
 def copy_file_or_directory(src, dest):
@@ -79,6 +79,7 @@ def generate_config(destination):
             }
         },
         "theme": "simple",
+        "favicon": None,
         "reveal_template": "reveal_template.html",
         "toc_template": "toc_template.html",
         "logging": "info",

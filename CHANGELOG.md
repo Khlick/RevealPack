@@ -5,6 +5,18 @@ All notable changes to RevealPack will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.8] - 2025-02-24
+
+### Added
+- **Optional favicon configuration**: New `favicon` option in `config.json` to control favicon inclusion in generated templates.
+  - When set to a path (e.g. `"favicon.png"` or `"favicon.ico"`), the path is interpreted relative to the libraries directory; the favicon `<link>` is included in both the reveal template and the TOC template.
+  - When `null` or omitted, no favicon link is emitted in either template.
+  - Default generated config includes `"favicon": null`.
+
+### Technical Details
+- Modified `revealpack/setup.py`: `create_reveal_template()` and `create_toc_template()` now conditionally add the favicon `<link>` based on `config.get("favicon")`.
+- Updated `revealpack/__init__.py` default config and `revealpack/config.json` to include the optional `favicon` key.
+
 ## [1.4.7] - 2024-12-19
 
 ### Fixed

@@ -102,6 +102,7 @@ Here is an example of what your `config.json` might look like:
     }
   },
   "theme": "custom_theme/theme.css",
+  "favicon": null,
   "reveal_template": "reveal_template.html",
   "toc_template": "toc_template.html",
   "logging": "warning",

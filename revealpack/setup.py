@@ -305,7 +305,10 @@ def create_reveal_template():
     # Create a list of formatted key-value pairs
     reveal_config_str = dict_to_js_notation(config["reveal_configurations"])
     plugin_config_str = dict_to_js_notation(config["packages"]["reveal_plugins"]["plugin_configurations"])
-    favicon_path = Path(source_obj.get("libraries", "lib")) / "favicon.png"
+    favicon_path = None
+    if config.get("favicon"):
+        favicon_path = Path(source_obj.get("libraries", "lib")) / config["favicon"]
+    favicon_line = f'        <link rel="icon" type="image/x-icon" href="{favicon_path}">\n' if favicon_path else ""
 
     # Create Reveal.js template with Jinja2 placeholders for build.py
     reveal_template = f"""
@@ -316,8 +319,7 @@ def create_reveal_template():
         <meta name="google" content="notranslate">
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
         <title>{{{{deck.title}}}}</title>
-        <link rel="icon" type="image/x-icon" href="{favicon_path}">
-        <link rel="stylesheet" href="./src/css/reset.css">
+{favicon_line}        <link rel="stylesheet" href="./src/css/reset.css">
         <link rel="stylesheet" href="./src/css/reveal.css">
         <link rel="stylesheet" href="./src/css/revealpack.css">
         <link rel="stylesheet" href="./src/theme/{theme_name}.css" id="theme">
@@ -478,7 +480,10 @@ def create_reveal_template():
 def create_toc_template():
     """Create the TOC template and save it to the source root directory."""
     source_obj = config["directories"]["source"]
-    favicon_path = os.path.join(source_obj.get("libraries","lib"), "favicon.png")
+    favicon_path = None
+    if config.get("favicon"):
+        favicon_path = os.path.join(source_obj.get("libraries", "lib"), config["favicon"])
+    favicon_line = f'<link rel="icon" type="image/x-icon" href="{favicon_path}">\n        ' if favicon_path else ""
     toc_str = f"""
     <!DOCTYPE html>
     <html lang="en-US">
@@ -487,8 +492,7 @@ def create_toc_template():
         <meta name="google" content="notranslate">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Table of Contents</title>
-        <link rel="icon" type="image/x-icon" href="{favicon_path}">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+        {favicon_line}<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
         <style>
             body {{
                 font-family: Arial, sans-serif;

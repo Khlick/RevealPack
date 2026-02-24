@@ -25,6 +25,7 @@ Reference the table below for configuration options parsed by the [`revealpack s
 |                          | [`external`](#packagesreveal_pluginsexternal) | External plugins with their versions and download URLs     |
 |                          | `plugin_configurations`      | Specific configurations for each plugin                                     |
 | `theme`                  |                              | Path to the custom theme CSS file (e.g., `custom_theme/theme.css`)          |
+| `favicon`                |                              | Optional. Path to the favicon file relative to the libraries directory (e.g., `favicon.png`). When set, the favicon `<link>` is included in the reveal and TOC templates; when `null` or omitted, no favicon link is emitted. |
 | `reveal_template`        |                              | Name of the Jinja2 template file for generating the presentation HTML       |
 | `toc_template`           |                              | Path to the Jinja2 template file for generating the table of contents HTML  |
 | `logging`                |                              | Logging level for setup and build processes (e.g., `error`, see [logging docs](https://docs.python.org/3/library/logging.html#levels).) |

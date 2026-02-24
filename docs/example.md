@@ -37,7 +37,7 @@ cd /path/to/your/project
 ```
 
 3. **Update Configuration**:
-    - Modify the generated `config.json` file to suit your project needs. Update the `info`, `directories`, `packages`, `theme`, `reveal_template`, `toc_template`, `logging`, `highlight_theme`, `custom_scripts`, `force_plugin_download`, and `reveal_configurations` fields.
+    - Modify the generated `config.json` file to suit your project needs. Update the `info`, `directories`, `packages`, `theme`, `favicon`, `reveal_template`, `toc_template`, `logging`, `highlight_theme`, `custom_scripts`, `force_plugin_download`, and `reveal_configurations` fields.
 
 ```json
 {
@@ -109,6 +109,7 @@ cd /path/to/your/project
     }
   },
   "theme": "custom_theme/theme.css",
+  "favicon": null,
   "reveal_template": "reveal_template.html",
   "toc_template": "toc_template.html",
   "logging": "detailed",
