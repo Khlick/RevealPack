@@ -111,28 +111,44 @@ def get_theme_path(config) -> str:
         return str(theme_full_path)
 
 def cleanup_temp_files(files_list):
-    """Delete specified files and remove their parent directories if they become empty."""
+    """Delete specified files and remove their parent directories if they become empty.
+    Cleanup errors are logged but will not cause program termination.
+    """
     for file_path in files_list:
         # Delete the file if it exists
-        if os.path.isfile(file_path):
-            os.remove(file_path)
-            logging.debug(f"Deleted file: {file_path}")
-        else:
-            logging.warning(f"File not found: {file_path}")
-        
-        # Check if the parent directory exists and is empty, then remove it
+        try:
+            if os.path.isfile(file_path):
+                try:
+                    os.remove(file_path)
+                    logging.debug(f"Deleted file: {file_path}")
+                except Exception as e:
+                    logging.warning(f"Failed to delete file {file_path}: {e}")
+            else:
+                logging.warning(f"File not found: {file_path}")
+        except Exception as e:
+            logging.warning(f"Error checking file {file_path}: {e}")
+
+        # Now check and try to remove empty parent directories
         parent_dir = os.path.dirname(file_path)
         while parent_dir:
-            if os.path.exists(parent_dir):
-                if not os.listdir(parent_dir):  # Check if directory is empty
-                    os.rmdir(parent_dir)
-                    logging.debug(f"Deleted empty directory: {parent_dir}")
+            try:
+                if os.path.exists(parent_dir):
+                    if not os.listdir(parent_dir):  # Directory is empty
+                        try:
+                            os.rmdir(parent_dir)
+                            logging.debug(f"Deleted empty directory: {parent_dir}")
+                        except Exception as e:
+                            logging.warning(f"Failed to delete directory {parent_dir}: {e}")
+                            break  # Don't keep trying to remove parent dirs if this one failed
+                    else:
+                        break  # Stop if directory is not empty
                 else:
-                    break  # Stop if directory is not empty
-            else:
-                logging.debug(f"Directory does not exist: {parent_dir}")
-                break  # Exit the loop if the directory doesn't exist
-            
+                    logging.debug(f"Directory does not exist: {parent_dir}")
+                    break  # Exit the loop if the directory doesn't exist
+            except Exception as e:
+                logging.warning(f"Error checking/removing directory {parent_dir}: {e}")
+                break  # Stop further attempts up the tree
+
             parent_dir = os.path.dirname(parent_dir)
 
 def get_delimiter_from_file(file_path: str) -> str:
