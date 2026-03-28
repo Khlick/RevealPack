@@ -21,6 +21,7 @@ from _utils.file_operations import (
 )
 from _utils.html_operations import beautify_html, compile_scss
 from _utils.config_operations import read_config, initialize_logging
+from _utils.json_helpers import json_loads_lenient
 from _utils.presentation_operations import (
     parse_slide,
     dict_to_html_attrs,
@@ -28,8 +29,9 @@ from _utils.presentation_operations import (
 )
 from _utils.reveal_plugin_helpers import (
     deck_reveal_slugs_for_copy,
-    global_plugin_names_for_initialize,
+    format_deck_plugin_init_configs,
     prepare_deck_plugins,
+    reveal_plugins_list_js,
 )
 
 # Major version of cached Reveal.js (e.g. 5, 6); set by load_revealjs_major_version().
@@ -678,8 +680,6 @@ def generate_presentation(decks=None):
     )
     env.filters["to_html_attrs"] = dict_to_html_attrs
 
-    global_plugin_names = global_plugin_names_for_initialize(config)
-
     reveal_cached = Path(config["directories"]["source"]["root"]) / "cached" / "reveal.js"
     deck_plugin_major = load_revealjs_major_version(reveal_cached)
 
@@ -722,7 +722,9 @@ def generate_presentation(decks=None):
         presentation_json_path = os.path.join(presentation_path, "presentation.json")
         if os.path.exists(presentation_json_path):
             with open(presentation_json_path, "r", encoding="utf-8") as f:
-                presentation_data = json.load(f)
+                presentation_data = json_loads_lenient(
+                    f.read(), source=presentation_json_path
+                )
             deck.update(presentation_data)
 
         # Parse slides based on the conditions
@@ -763,11 +765,18 @@ def generate_presentation(decks=None):
 
         prepare_deck_plugins(deck, config, reveal_cached, deck_plugin_major)
 
+        deck_plugin_config_js = format_deck_plugin_init_configs(
+            deck["plugins"]["reveal"] + deck["plugins"]["external"]
+        )
+        reveal_plugins_list = reveal_plugins_list_js(config, deck)
+
         logging.info(f"Finished parsing '{str(page_title_str)}'.")
 
         # Render the HTML
         rendered_html = template.render(
-            deck=deck, global_plugin_names=global_plugin_names
+            deck=deck,
+            reveal_plugins_list_js=reveal_plugins_list,
+            deck_plugin_config_js=deck_plugin_config_js,
         )
         
         # Store rendered HTML for later

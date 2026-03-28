@@ -326,17 +326,6 @@ def create_reveal_template():
         """
     )
 
-    plugins_init_suffix = """
-            {%- if deck.plugins %}
-            {%- for item in deck.plugins.reveal %}
-            {%- if global_plugin_names or loop.index > 1 %}, {% endif %}{{ item.js_id }}
-            {%- endfor %}
-            {%- for ext in deck.plugins.external %}
-            {%- if global_plugin_names or deck.plugins.reveal or loop.index > 1 %}, {% endif %}{{ ext.name }}
-            {%- endfor %}
-            {%- endif %}
-    """
-
     # Create Reveal.js template with Jinja2 placeholders for build.py
     reveal_template = (
         f"""
@@ -494,11 +483,9 @@ def create_reveal_template():
 { add_offset_to_string(reveal_config_str, 14) }
 { add_offset_to_string(plugin_config_str, 14) }
             plugins: ["""
-        + "{{ global_plugin_names }}"
-        + plugins_init_suffix
-        + """
-            ]
-            }});
+        + "{{ reveal_plugins_list_js }}],\n"
+        + "{{ deck_plugin_config_js }}\n"
+        + """            });
         </script>
     </body>
 </html>

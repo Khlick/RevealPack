@@ -11,9 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Per-deck Reveal plugins** via `presentation.json` → **`plugins`**:
   - **`reveal`**: array of `{ "name": "..." }` entries (e.g. `markdown`, `mathjax4`). Names are resolved to filesystem bundles under cached reveal.js and to JS identifiers (`RevealMarkdown`, `RevealMath.MathJax4`, etc.); invalid names are skipped with a warning.
   - **`external`**: array of `{ "name": "...", "source": "https://..." }` for CDN scripts; **source** is the URL in the generated `<script>` tag.
+  - Optional **`config`** on each `reveal` / `external` entry: `{ "config_id": "chalkboard", "settings": { ... } }` → emitted in `Reveal.initialize` after `plugins: [...]` (same JS object style as global `plugin_configurations`).
 
 ### Changed
-- `reveal_template.html` uses `{{ global_plugin_names }}` plus normalized `deck.plugins.reveal` / `deck.plugins.external` (prepared at build with `slug`, `js_id`, and validated **source**).
+- `reveal_template.html` injects `{{ reveal_plugins_list_js }}` and `{{ deck_plugin_config_js }}` (built in Python); deck `plugins.reveal` / `plugins.external` are normalized with `slug`, `js_id`, and validated **source**.
 - **`copy_plugins()`** unions filesystem slugs required by deck `plugins.reveal` (after validation) with global `built_in` plugins.
 
 ### Technical Details

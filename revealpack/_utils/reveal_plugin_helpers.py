@@ -5,8 +5,53 @@ from __future__ import annotations
 import json
 import logging
 import os
+import re
 from pathlib import Path
 from typing import Any
+
+from _utils.json_helpers import json_loads_lenient
+
+_CONFIG_ID_RE = re.compile(r"^[a-zA-Z_$][a-zA-Z0-9_$]*$")
+
+
+def _parse_plugin_config(raw: Any) -> dict[str, Any] | None:
+    """Return {config_id, settings} or None. settings is always a dict."""
+    if raw is None:
+        return None
+    if not isinstance(raw, dict):
+        logging.warning("plugin config must be an object; ignoring.")
+        return None
+    cid = raw.get("config_id")
+    if not cid or not isinstance(cid, str) or not cid.strip():
+        logging.warning("plugin config requires non-empty string config_id; ignoring.")
+        return None
+    cid = cid.strip()
+    if not _CONFIG_ID_RE.match(cid):
+        logging.warning(
+            "plugin config_id %r is not a valid JavaScript identifier; ignoring.", cid
+        )
+        return None
+    settings = raw.get("settings")
+    if settings is None:
+        settings = {}
+    elif not isinstance(settings, dict):
+        logging.warning("plugin config settings must be an object; ignoring.")
+        return None
+    return {"config_id": cid, "settings": settings}
+
+
+def format_deck_plugin_init_configs(plugin_entries: list[dict[str, Any]]) -> str:
+    """JS object lines for Reveal.initialize from deck plugins' optional config (indented)."""
+    from _utils.string_operations import add_offset_to_string, dict_to_js_notation
+
+    chunks: list[str] = []
+    for entry in plugin_entries:
+        cfg = entry.get("config")
+        if not cfg:
+            continue
+        block = dict_to_js_notation({cfg["config_id"]: cfg["settings"]}, 0)
+        chunks.append(add_offset_to_string(block, 14))
+    return "\n".join(chunks)
 
 
 def mathjax_plugin_identifier(config: dict) -> str:
@@ -48,6 +93,21 @@ def global_plugin_names_for_initialize(config: dict) -> str:
         names.append(details.get("export", plugin.capitalize()))
 
     return ", ".join(names)
+
+
+def reveal_plugins_list_js(config: dict, deck: dict) -> str:
+    """Comma-separated JS identifiers for `plugins: [ ... ]` (global config + deck.plugins)."""
+    parts: list[str] = []
+    g = global_plugin_names_for_initialize(config)
+    for token in (x.strip() for x in g.split(",")):
+        if token:
+            parts.append(token)
+    pl = deck.get("plugins") or {}
+    for item in pl.get("reveal") or []:
+        parts.append(str(item["js_id"]))
+    for ext in pl.get("external") or []:
+        parts.append(str(ext["name"]))
+    return ", ".join(parts)
 
 
 def resolve_reveal_plugin_name(name: str, config: dict) -> tuple[str, str]:
@@ -97,7 +157,7 @@ def deck_reveal_slugs_for_copy(
             continue
         try:
             with open(pj, encoding="utf-8") as f:
-                data = json.load(f)
+                data = json_loads_lenient(f.read(), source=pj)
         except (json.JSONDecodeError, OSError) as e:
             logging.warning("Could not read %s: %s", pj, e)
             continue
@@ -156,11 +216,17 @@ def prepare_deck_plugins(
                 slug,
             )
             continue
-        reveal_out.append(
-            {"name": raw_name.strip(), "slug": slug, "js_id": js_id}
-        )
+        row: dict[str, Any] = {
+            "name": raw_name.strip(),
+            "slug": slug,
+            "js_id": js_id,
+        }
+        cfg = _parse_plugin_config(item.get("config"))
+        if cfg:
+            row["config"] = cfg
+        reveal_out.append(row)
 
-    ext_out: list[dict[str, str]] = []
+    ext_out: list[dict[str, Any]] = []
     for item in raw.get("external") or []:
         if not isinstance(item, dict):
             logging.warning("Skipping invalid plugins.external entry (not an object).")
@@ -172,6 +238,10 @@ def prepare_deck_plugins(
                 "Skipping plugins.external entry missing name or source: %s", item
             )
             continue
-        ext_out.append({"name": str(name), "source": str(source)})
+        row = {"name": str(name), "source": str(source)}
+        cfg = _parse_plugin_config(item.get("config"))
+        if cfg:
+            row["config"] = cfg
+        ext_out.append(row)
 
     deck["plugins"] = {"reveal": reveal_out, "external": ext_out}

@@ -42,8 +42,8 @@ Use this object when a deck needs extra Reveal.js plugins, or when loading a thi
 
 | Sub-field | Description |
 | --------- | ----------- |
-| `reveal` | Array of objects `{ "name": "..." }` only. Each **name** identifies a plugin shipped with reveal.js. Names are checked against the **cached** `source/cached/reveal.js` tree (e.g. `dist/plugin/<slug>.js` on Reveal 6, or `plugin/<slug>/` on Reveal 5): unknown names are skipped with a warning. Examples: `notes`, `markdown`, `zoom`, `math` (uses your global `plugin_configurations` MathJax variant), or explicit math variants such as `mathjax4` / `mathjax3` / `katex` (all use the `math` bundle with the matching `RevealMath.*` identifier). |
-| `external` | Array of objects `{ "name": "GlobalExportName", "source": "https://..." }`. Each **source** is emitted as `<script src="...">` before `Reveal.initialize`. **name** is the global passed into the `plugins: [...]` array. |
+| `reveal` | Array of objects with **`name`** (required) and optional **`config`**. Each **name** identifies a plugin shipped with reveal.js (validated against cached reveal.js). Optional **`config`**: `{ "config_id": "chalkboard", "settings": { ... } }` — **config_id** must be a valid JavaScript identifier; **settings** is an object serialized into `Reveal.initialize` under that key (after the `plugins: [...]` line). |
+| `external` | Array of objects with **`name`**, **`source`** (required), and optional **`config`** (same shape as for `reveal`). |
 
 **Example:**
 
@@ -57,6 +57,16 @@ Use this object when a deck needs extra Reveal.js plugins, or when loading a thi
     {
       "name": "RevealCustom",
       "source": "https://example.com/reveal-custom.js"
+    },
+    {
+      "name": "RevealChalkboard",
+      "source": "https://cdn.jsdelivr.net/npm/reveal.js-plugins@latest/chalkboard/plugin.js",
+      "config": {
+        "config_id": "chalkboard",
+        "settings": {
+          "boardmarkerWidth": 3
+        }
+      }
     }
   ]
 }
