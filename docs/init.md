@@ -58,7 +58,7 @@ A comprehensive configuration file that controls all aspects of your RevealPack 
     }
   },
   "packages": {
-    "reveal.js": "5.1.0",
+    "reveal.js": "6.0.0",
     "reveal_plugins": {
       "built_in": ["notes", "highlight", "math"],
       "external": {}
@@ -120,7 +120,7 @@ Configure Reveal.js version and plugins:
 ```json
 {
   "packages": {
-    "reveal.js": "5.2.1",
+    "reveal.js": "6.0.0",
     "reveal_plugins": {
       "built_in": ["notes", "highlight", "math", "zoom"],
       "external": {
@@ -134,7 +134,7 @@ Configure Reveal.js version and plugins:
 }
 ```
 
-**Note:** RevealPack is tested with Reveal.js 5.2.1 and is backwards compatible with Reveal.js 4.x versions.
+**Note:** New projects default to Reveal.js 6.x. Reveal.js 5.x remains supported; set `packages.reveal.js` and run `revealpack setup` to download the matching version.
 
 ### Theme Settings
 Configure your presentation theme:

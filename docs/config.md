@@ -19,7 +19,7 @@ Reference the table below for configuration options parsed by the [`revealpack s
 |                          | `presentation_root`          | Directory for storing individual presentation decks (e.g., `decks`)         |
 |                          | `libraries`                  | Directory for storing shared libraries and assets (e.g., `lib`)             |
 | `packages`               |                              | Configuration for Reveal.js and associated plugins                          |
-|                          | `reveal.js`                  | The version of Reveal.js to be used (e.g., `5.1.0`)                         |
+|                          | `reveal.js`                  | The version of Reveal.js to use (e.g., `6.0.0` or `5.3.0`). Must be 5.x or 6.x. |
 | `packages.reveal_plugins`|                              | Plugins configuration for Reveal.js                                         |
 |                          | `built_in`                   | List of built-in plugins to include (e.g., `notes`, `highlight`, `math`)    |
 |                          | [`external`](#packagesreveal_pluginsexternal) | External plugins with their versions and download URLs     |
@@ -37,6 +37,15 @@ Reference the table below for configuration options parsed by the [`revealpack s
 |                          | `preserve_code_formatting`   | Boolean to preserve whitespace in code blocks (default: true)              |
 |                          | `html_indent_size`           | Number of spaces for HTML indentation (default: 2)                          |
 
+## Built-in plugin script paths (Reveal.js 5 vs 6)
+
+RevealPack generates `<script src="...">` tags for built-in plugins from `cached/reveal.js`. Layout differs by major version:
+
+- **Reveal.js 5.x:** one script per plugin, e.g. `./src/plugin/notes/notes.js`, `./src/plugin/highlight/highlight.js`.
+- **Reveal.js 6.x:** flat bundles under `./src/plugin/`, e.g. `./src/plugin/notes.js`, `./src/plugin/highlight.js`.
+
+External plugins always use `./src/plugin/{alias}/{main}.js`. After changing `packages.reveal.js`, run `revealpack setup` (use `--force-plugin-download` if the cache is stale). If `config.json` and the cached reveal.js disagree, `revealpack build` logs a warning.
+
 ## Specifications On Select Configurations
 
 ### `packages.reveal_plugins.external`
@@ -45,7 +54,7 @@ External plugins are optional, so the `external` field may be omitted. However, 
 ```json
 {
   "packages": {
-    "reveal.js": "5.1.0",
+    "reveal.js": "6.0.0",
     "reveal_plugins": {
       "external": {
         "plugin1-name": {
@@ -70,7 +79,7 @@ Additionally, the `alias` and `main` fields can be used to specify a different n
 ```json
 {
   "packages": {
-    "reveal.js": "5.1.0",
+    "reveal.js": "6.0.0",
     "reveal_plugins": {
       "external": {
         "plugin1-name": {
@@ -115,7 +124,7 @@ Here is an example of how to use the `alias` and `main` fields:
 ```json
 {
   "packages": {
-    "reveal.js": "5.1.0",
+    "reveal.js": "6.0.0",
     "reveal_plugins": {
       "external": {
         "vizzy": {
@@ -155,7 +164,7 @@ RevealPack includes enhanced MathJax processing that supports flexible version s
           "mathjax": "https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"
         },
         "mathjax4": {
-          "mathjax": "https://cdn.jsdelivr.net/npm/mathjax@4.0.0-beta.6/tex-mml-chtml.js"
+          "mathjax": "https://cdn.jsdelivr.net/npm/mathjax@4.1.1/es5/tex-mml-chtml.js"
         }
       }
     }

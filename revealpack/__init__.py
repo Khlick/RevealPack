@@ -37,7 +37,7 @@ def generate_config(destination):
             }
         },
         "packages": {
-            "reveal.js": "5.2.1",
+            "reveal.js": "6.0.0",
             "reveal_plugins": {
                 "built_in": [
                     "notes",
@@ -46,7 +46,8 @@ def generate_config(destination):
                 ],
                 "external": {},
                 "plugin_configurations": {
-                    "mathjax3": {
+                    "mathjax4": {
+                        "mathjax": "https://cdn.jsdelivr.net/npm/mathjax@4.1.1/es5/tex-mml-chtml.js",
                         "loader": {
                             "load": [
                                 "[tex]/html"

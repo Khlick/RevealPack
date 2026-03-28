@@ -10,9 +10,9 @@
 - Verify installation: `sass --version`
 
 **Reveal.js Compatibility:**
-- **Tested Version**: Reveal.js 5.2.1
-- **Backwards Compatible**: Reveal.js 4.x versions
-- **Minimum Version**: Reveal.js 4.0.0
+- **Default / tested**: Reveal.js 6.0.0
+- **Also supported**: Reveal.js 5.x
+- **Minimum Version**: Reveal.js 5.0.0 (earlier releases may not be supported)
 
 ## Description
 

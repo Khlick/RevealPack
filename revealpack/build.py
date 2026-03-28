@@ -27,6 +27,74 @@ from _utils.presentation_operations import (
     validate_titlepage,
 )
 
+# Major version of cached Reveal.js (e.g. 5, 6); set by load_revealjs_major_version().
+REVEALJS_MAJOR_VERSION = None
+
+
+def warn_reveal_config_cache_mismatch(config: dict, cached_major: int) -> None:
+    """Warn when config's reveal.js major version does not match cached Reveal.js."""
+    try:
+        cfg_ver = config["packages"]["reveal.js"]
+        cfg_major = int(str(cfg_ver).strip().split(".")[0])
+    except (ValueError, IndexError, KeyError, TypeError):
+        return
+    if cfg_major != cached_major:
+        logging.warning(
+            "config.json packages['reveal.js'] is %r (major %s) but cached reveal.js "
+            "reports major %s. Run `revealpack setup --force-plugin-download` to refresh.",
+            cfg_ver,
+            cfg_major,
+            cached_major,
+        )
+
+
+def load_revealjs_major_version(reveal_root: Path) -> int:
+    """Read package.json in reveal_root and return the major version number.
+
+    Defaults to 5 when package.json is missing or unparsable (Reveal.js 5 layout).
+    """
+    global REVEALJS_MAJOR_VERSION
+    if REVEALJS_MAJOR_VERSION is not None:
+        return REVEALJS_MAJOR_VERSION
+
+    pkg = reveal_root / "package.json"
+    if not pkg.exists():
+        REVEALJS_MAJOR_VERSION = 5
+        logging.info(
+            "No package.json in reveal cache; assuming Reveal.js major version 5."
+        )
+        return REVEALJS_MAJOR_VERSION
+
+    try:
+        with open(pkg, encoding="utf-8") as f:
+            data = json.load(f)
+        version_str = str(data.get("version", "5"))
+        major = int(version_str.split(".")[0])
+        REVEALJS_MAJOR_VERSION = major
+        logging.info(
+            f"Detected Reveal.js major version {major} from {pkg.name} ({version_str!r})."
+        )
+        return major
+    except (ValueError, OSError, json.JSONDecodeError, TypeError) as e:
+        logging.warning(
+            f"Could not parse Reveal.js version from {pkg}: {e}; defaulting to major version 5."
+        )
+        REVEALJS_MAJOR_VERSION = 5
+        return REVEALJS_MAJOR_VERSION
+
+
+def revealjs_builtin_plugin_dir(reveal_root: Path) -> Path:
+    """Directory containing built-in Reveal.js plugins (layout differs for v6+)."""
+    major = load_revealjs_major_version(reveal_root)
+    if major >= 6:
+        return reveal_root / "dist" / "plugin"
+    return reveal_root / "plugin"
+
+
+def revealjs_highlight_builtin_dir(reveal_root: Path) -> Path:
+    """Directory for bundled highlight.js CSS themes."""
+    return revealjs_builtin_plugin_dir(reveal_root) / "highlight"
+
 
 def get_referenced_files(html_content, libraries_dir, source_root=None, current_path=None):
     """Extract file references from HTML content that are in the libraries directory.
@@ -201,23 +269,44 @@ def copy_plugins():
     """Copy plugins to the production directory."""
     logging.info("Copying plugins...")
 
-    # Source and destination directories
     source_root = config["directories"]["source"]["root"]
-    dest_dir = os.path.join(config["directories"]["build"], "src", "plugin")
+    dest_dir = Path(config["directories"]["build"]) / "src" / "plugin"
+    dest_dir.mkdir(parents=True, exist_ok=True)
 
-    # Create destination directory if it doesn't exist
-    os.makedirs(dest_dir, exist_ok=True)
-
-    # Copy built-in plugins
+    reveal_root = Path(source_root) / "cached" / "reveal.js"
+    major = load_revealjs_major_version(reveal_root)
     builtin_plugins = config["packages"]["reveal_plugins"]["built_in"]
-    for plugin in builtin_plugins:
-        source_path = os.path.join(source_root, "cached", "reveal.js", "plugin", plugin)
-        dest_path = os.path.join(dest_dir, plugin)
 
-        if os.path.exists(source_path):
-            copy_and_overwrite(source_path, dest_path)
-        else:
-            logging.warning(f"Built-in plugin {plugin} not found in source directory.")
+    # Reveal 5: copy each plugin folder (plugin/<name>/…).
+    # Reveal 6+: copy packaged bundles (dist/plugin/<name>.js); highlight also copies
+    # dist/plugin/highlight/*.css (e.g. monokai.css) into src/plugin/highlight/.
+    if major >= 6:
+        plugin_root = reveal_root / "dist" / "plugin"
+        for plugin in builtin_plugins:
+            js_src = plugin_root / f"{plugin}.js"
+            if not js_src.is_file():
+                logging.warning(f"Built-in plugin bundle not found: {js_src}")
+                continue
+            copy_file_if_different(str(js_src), str(dest_dir / f"{plugin}.js"))
+            if plugin == "highlight":
+                hl_src = plugin_root / "highlight"
+                if hl_src.is_dir():
+                    copy_and_overwrite(str(hl_src), str(dest_dir / "highlight"))
+                else:
+                    logging.warning(
+                        f"Highlight theme directory not found (expected {hl_src})."
+                    )
+    else:
+        plugin_root = reveal_root / "plugin"
+        for plugin in builtin_plugins:
+            source_path = plugin_root / plugin
+            dest_path = dest_dir / plugin
+            if source_path.exists():
+                copy_and_overwrite(str(source_path), str(dest_path))
+            else:
+                logging.warning(
+                    f"Built-in plugin {plugin} not found in source directory."
+                )
 
     # Copy external plugins
     external_plugins = config["packages"]["reveal_plugins"].get("external", {})
@@ -452,8 +541,8 @@ def compile_theme():
 
     paths_to_check = [
         highlight_path,
-        source_root / "cached" / "reveal.js" / "plugin" / "highlight" / highlight_path.name,
-        project_root / highlight_path.name
+        revealjs_highlight_builtin_dir(reveal_root) / highlight_path.name,
+        project_root / highlight_path.name,
     ]
 
     highlight_css_path = None
@@ -488,14 +577,23 @@ def copy_reveal():
     build_root = Path(config["directories"]["build"])
     project_root = Path(".")
 
-    files_to_copy = [
-        ("dist/reset.css", "src/css/reset.css"),
-        ("dist/reveal.css", "src/css/reveal.css"),
-        ("dist/reveal.js", "src/reveal.js"),
-        ("dist/reveal.js.map", "src/reveal.js.map"),
-        ("dist/reveal.esm.js", "src/reveal.esm.js"),
-        ("dist/reveal.esm.js.map", "src/reveal.esm.js.map"),
-    ]
+    major = load_revealjs_major_version(source_root)
+    if major >= 6:
+        files_to_copy = [
+            ("dist/reset.css", "src/css/reset.css"),
+            ("dist/reveal.css", "src/css/reveal.css"),
+            ("dist/reveal.js", "src/reveal.js"),
+            ("dist/reveal.mjs", "src/reveal.mjs"),
+        ]
+    else:
+        files_to_copy = [
+            ("dist/reset.css", "src/css/reset.css"),
+            ("dist/reveal.css", "src/css/reveal.css"),
+            ("dist/reveal.js", "src/reveal.js"),
+            ("dist/reveal.js.map", "src/reveal.js.map"),
+            ("dist/reveal.esm.js", "src/reveal.esm.js"),
+            ("dist/reveal.esm.js.map", "src/reveal.esm.js.map"),
+        ]
 
     for src, dest in files_to_copy:
         src_path = source_root / src
@@ -518,19 +616,25 @@ def copy_reveal():
         highlight_path = highlight_path.with_suffix(".css")
 
     highlight_css = None
+    highlight_match = None
+    hl_builtin = revealjs_highlight_builtin_dir(source_root)
     paths_to_check = [
         highlight_path,
-        source_root / "plugin" / "highlight" / highlight_path.name,
-        project_root / highlight_path.name
+        hl_builtin / highlight_path.name,
+        project_root / highlight_path.name,
     ]
 
     for path in paths_to_check:
         if path.exists():
             highlight_css = path.name
+            highlight_match = path
             break
 
     if highlight_css:
-        src_path = source_root / "plugin" / "highlight" / "monokai.css" if highlight_css == "default" else highlight_path
+        if highlight_theme == "default":
+            src_path = hl_builtin / "monokai.css"
+        else:
+            src_path = highlight_match if highlight_match is not None else hl_builtin / highlight_path.name
         dest_path = build_root / "src" / "theme" / highlight_css
 
         dest_path.parent.mkdir(parents=True, exist_ok=True)
@@ -764,9 +868,17 @@ if __name__ == "__main__":
     
     # Initialize jogger for tracking errors/success
     initialize_logging(config, args.log_level)
-    
+
+    reveal_cached = Path(config["directories"]["source"]["root"]) / "cached" / "reveal.js"
+    cached_major = load_revealjs_major_version(reveal_cached)
+    warn_reveal_config_cache_mismatch(config, cached_major)
+
     # Log status
-    logging.info(f"Building {config["info"].get("project_title", config["info"].get("short_title", "RevealPack Presentations"))}")
+    info = config["info"]
+    logging.info(
+        "Building %s",
+        info.get("project_title", info.get("short_title", "RevealPack Presentations")),
+    )
     
     # Handle clean build
     if args.clean:

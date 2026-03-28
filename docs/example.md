@@ -56,7 +56,7 @@ cd /path/to/your/project
     }
   },
   "packages": {
-    "reveal.js": "5.1.0",
+    "reveal.js": "6.0.0",
     "reveal_plugins": {
       "built_in": ["notes", "highlight", "math"],
       "external": {
@@ -83,7 +83,7 @@ cd /path/to/your/project
       },
       "plugin_configurations": {
         "mathjax4": {
-          "mathjax": "https://cdn.jsdelivr.net/npm/mathjax@4.0.0-beta.6/tex-mml-chtml.js",
+          "mathjax": "https://cdn.jsdelivr.net/npm/mathjax@4.1.1/es5/tex-mml-chtml.js",
           "loader": {
             "load": ["[tex]/html"]
           },

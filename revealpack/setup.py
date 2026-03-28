@@ -20,6 +20,25 @@ from _utils.string_operations import (
 from _utils.file_operations import get_theme_path
 
 
+def parse_reveal_js_major_version(version_str: str) -> int:
+    """Parse the major version from config['packages']['reveal.js'] (e.g. '6.0.0').
+
+    RevealPack supports reveal.js 5.x and 6.x. Earlier versions are not supported.
+    """
+    try:
+        major = int(str(version_str).strip().split(".")[0])
+    except (ValueError, IndexError):
+        logging.error(f"Invalid reveal.js version string: {version_str!r}")
+        sys.exit(1)
+    if major < 5:
+        logging.error(
+            "reveal.js versions earlier than 5 are not supported. "
+            "Use reveal.js 5.x or 6.x in config['packages']['reveal.js']."
+        )
+        sys.exit(1)
+    return major
+
+
 def create_directories():
     """Create directories based on config.json if they don't exist."""
     # Create production directory
@@ -174,11 +193,16 @@ def create_reveal_template():
     builtin_plugins = config["packages"]["reveal_plugins"]["built_in"]
     external_plugins = config["packages"]["reveal_plugins"]["external"]
 
-    # Create the list of built-in plugins
+    reveal_version = config["packages"]["reveal.js"]
+    reveal_major = parse_reveal_js_major_version(reveal_version)
+
+    # Create the list of built-in plugins (Reveal 5: plugin/<name>/<name>.js; Reveal 6+: dist copies to src/plugin/<name>.js)
     all_plugins = []
     for plugin in builtin_plugins:
-        # Built-in plugins don't have noscript/omit fields, so always include them
-        all_plugins.append(f"src/plugin/{plugin}/{plugin}.js")
+        if reveal_major >= 6:
+            all_plugins.append(f"src/plugin/{plugin}.js")
+        else:
+            all_plugins.append(f"src/plugin/{plugin}/{plugin}.js")
 
     # Create the list of external plugins, using alias and main if they exist
     for plugin, details in external_plugins.items():
@@ -241,7 +265,9 @@ def create_reveal_template():
         external_plugin_names.append(exportName)
 
     plugin_name_list = ", ".join(builtin_plugin_names + external_plugin_names)
-    
+
+    highlight_str = ""
+
     # Check if "highlight" is in the built_in plugins or "highlight.js" is in the external plugins
     if (
         "highlight" in config["packages"]["reveal_plugins"]["built_in"]
@@ -255,11 +281,21 @@ def create_reveal_template():
         if not theme_path.suffix:
             theme_path = theme_path.with_suffix('.css')
 
+        reveal_cached = source_root / "cached" / "reveal.js"
+        if reveal_major >= 6:
+            highlight_builtin = (
+                reveal_cached / "dist" / "plugin" / "highlight" / theme_path.name
+            )
+        else:
+            highlight_builtin = (
+                reveal_cached / "plugin" / "highlight" / theme_path.name
+            )
+
         # Paths to check
         paths_to_check = [
             theme_path,
-            source_root / "cached" / "reveal.js" / "plugin" / "highlight" / theme_path.name,
-            Path.cwd() / theme_path.name
+            highlight_builtin,
+            Path.cwd() / theme_path.name,
         ]
 
         # Find the highlight CSS file
@@ -673,6 +709,7 @@ def create_toc_template():
 
 def main():
     initialize_logging(config)
+    parse_reveal_js_major_version(config["packages"]["reveal.js"])
     create_directories()
     download_and_install_packages()
     update_theme()

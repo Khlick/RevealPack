@@ -38,7 +38,7 @@ Here is an example of what your `config.json` might look like:
     }
   },
   "packages": {
-    "reveal.js": "5.1.0",
+    "reveal.js": "6.0.0",
     "reveal_plugins": {
       "built_in": [
         "notes",
@@ -58,8 +58,8 @@ Here is an example of what your `config.json` might look like:
         }
       },
       "plugin_configurations": {
-        "mathjax3": {
-          "mathjax": "https://cdn.jsdelivr.net/npm/mathjax@4.0.0-beta.7/tex-mml-chtml.js",
+        "mathjax4": {
+          "mathjax": "https://cdn.jsdelivr.net/npm/mathjax@4.1.1/es5/tex-mml-chtml.js",
           "loader": {
             "load": [
               "[tex]/html"
@@ -267,11 +267,13 @@ Here is an example of what your `config.json` might look like:
     {% endif %}
   </div>
   <script src="./src/reveal.js"></script>
-  <script src="./src/plugin/notes/notes.js"></script>
-  <script src="./src/plugin/highlight/highlight.js"></script>
-  <script src="./src/plugin/math/math.js"></script>
+  <!-- Reveal.js 6.x: flat bundles under src/plugin/<name>.js -->
+  <script src="./src/plugin/notes.js"></script>
+  <script src="./src/plugin/highlight.js"></script>
+  <script src="./src/plugin/math.js"></script>
   <script src="./src/plugin/reveal-splash/reveal-splash.js"></script>
   <script src="./src/plugin/vizzy-reveal/vizzy.js"></script>
+  <!-- Reveal.js 5.x used nested paths, e.g. src/plugin/notes/notes.js -->
   <script>
     Reveal.initialize({
       controls: true,
@@ -280,10 +282,10 @@ Here is an example of what your `config.json` might look like:
       history: true,
       center: true,
       transition: "slide",
-      hash: true
-      plugins: [RevealNotes, RevealHighlight, RevealMath, Splash, Vizzy],
-      mathjax3: {
-        mathjax: "https://cdn.jsdelivr.net/npm/mathjax@4.0.0-beta.7/tex-mml-chtml.js",
+      hash: true,
+      plugins: [RevealNotes, RevealHighlight, RevealMath.MathJax4, Splash, Vizzy],
+      mathjax4: {
+        mathjax: "https://cdn.jsdelivr.net/npm/mathjax@4.1.1/es5/tex-mml-chtml.js",
         loader: {
           load: [
             "[tex]/html",

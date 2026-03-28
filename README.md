@@ -20,7 +20,7 @@ RevealPack is designed for creating suites of presentations that share themes an
 
 - **Python** >= 3.12 (3.9+ supported, 3.12+ recommended)
 - **Dart Sass CLI** - Required for SCSS/SASS theme compilation
-- **Reveal.js** >= 4.0.0 (tested with 5.2.1, backwards compatible with 4.x)
+- **Reveal.js** 5.x or 6.x (defaults use 6.0.0; 5.x remains supported)
 
 ### Install Dart Sass
 
@@ -227,7 +227,7 @@ The `config.json` file controls all aspects of your project:
 ```json
 {
   "packages": {
-    "reveal.js": "5.2.1",
+    "reveal.js": "6.0.0",
     "reveal_plugins": {
       "built_in": ["notes", "highlight", "math"],
       "external": {
@@ -243,7 +243,7 @@ The `config.json` file controls all aspects of your project:
 }
 ```
 
-**Note:** RevealPack is tested with Reveal.js 5.2.1 and is backwards compatible with Reveal.js 4.x versions.
+**Note:** New projects default to Reveal.js 6.x. Reveal.js 5.x is still supported; set `packages.reveal.js` accordingly and run `revealpack setup` to refresh the cached copy.
 
 ### Theme Configuration
 ```json
