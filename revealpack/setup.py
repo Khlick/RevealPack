@@ -218,54 +218,6 @@ def create_reveal_template():
 
         all_plugins.append(f"src/plugin/{alias}/{mainjs}.js")
 
-    # Generate plugin names for Reveal.initialize()
-    builtin_plugin_names = []
-    for plugin in builtin_plugins:
-        # Built-in plugins don't have omit field, so always include them
-        builtin_plugin_names.append(f"Reveal{plugin.capitalize()}")
-    
-    # Check if "RevealMath" is in the list
-    if "RevealMath" in builtin_plugin_names:
-        # Extract the plugin configurations from the config
-        plugin_config = config["packages"]["reveal_plugins"].get("plugin_configurations", {})
-
-        # Enhanced MathJax processing - check for mathjax# pattern
-        mathjax_replacement = None
-        for key in plugin_config.keys():
-            if key.startswith("mathjax"):
-                # Extract the version number if present
-                version = key[7:] if len(key) > 7 else ""
-                if version in ["", "2", "3", "4"]:
-                    mathjax_replacement = f"RevealMath.MathJax{version}" if version else "RevealMath"
-                    break
-        
-        # Fallback to original logic if no mathjax# pattern found
-        if mathjax_replacement is None:
-            if "mathjax2" in plugin_config:
-                mathjax_replacement = "RevealMath.MathJax2"
-            elif "mathjax3" in plugin_config:
-                mathjax_replacement = "RevealMath.MathJax3"
-            elif "mathjax4" in plugin_config:
-                mathjax_replacement = "RevealMath.MathJax4"
-            elif "katex" in plugin_config:
-                mathjax_replacement = "RevealMath.KaTeX"
-            else:
-                # None of the keys were found; "RevealMath" is sufficient
-                mathjax_replacement = "RevealMath"
-
-        # Modify the "RevealMath" entry in the builtin_plugin_names array
-        builtin_plugin_names[builtin_plugin_names.index("RevealMath")] = mathjax_replacement
-
-    external_plugin_names = []
-    for plugin, details in external_plugins.items():
-        # Skip if omit is true
-        if details.get("omit", False):
-            continue
-        exportName = details.get("export", plugin.capitalize())
-        external_plugin_names.append(exportName)
-
-    plugin_name_list = ", ".join(builtin_plugin_names + external_plugin_names)
-
     highlight_str = ""
 
     # Check if "highlight" is in the built_in plugins or "highlight.js" is in the external plugins
@@ -346,8 +298,48 @@ def create_reveal_template():
         favicon_path = Path(source_obj.get("libraries", "lib")) / config["favicon"]
     favicon_line = f'        <link rel="icon" type="image/x-icon" href="{favicon_path}">\n' if favicon_path else ""
 
+    deck_builtin_scripts = (
+        """
+        {%- if deck.plugins and deck.plugins.reveal %}
+        {%- for item in deck.plugins.reveal %}
+        <script src="./src/plugin/{{ item.slug }}.js"></script>
+        {%- endfor %}
+        {%- endif %}
+        {%- if deck.plugins and deck.plugins.external %}
+        {%- for ext in deck.plugins.external %}
+        <script src="{{ ext.source }}"></script>
+        {%- endfor %}
+        {%- endif %}
+        """
+        if reveal_major >= 6
+        else """
+        {%- if deck.plugins and deck.plugins.reveal %}
+        {%- for item in deck.plugins.reveal %}
+        <script src="./src/plugin/{{ item.slug }}/{{ item.slug }}.js"></script>
+        {%- endfor %}
+        {%- endif %}
+        {%- if deck.plugins and deck.plugins.external %}
+        {%- for ext in deck.plugins.external %}
+        <script src="{{ ext.source }}"></script>
+        {%- endfor %}
+        {%- endif %}
+        """
+    )
+
+    plugins_init_suffix = """
+            {%- if deck.plugins %}
+            {%- for item in deck.plugins.reveal %}
+            {%- if global_plugin_names or loop.index > 1 %}, {% endif %}{{ item.js_id }}
+            {%- endfor %}
+            {%- for ext in deck.plugins.external %}
+            {%- if global_plugin_names or deck.plugins.reveal or loop.index > 1 %}, {% endif %}{{ ext.name }}
+            {%- endfor %}
+            {%- endif %}
+    """
+
     # Create Reveal.js template with Jinja2 placeholders for build.py
-    reveal_template = f"""
+    reveal_template = (
+        f"""
 <!doctype html>
 <html lang="en-US">
     <head>
@@ -496,16 +488,22 @@ def create_reveal_template():
         </div>
         <script src="./src/reveal.js"></script>
 {add_offset_to_string('\n'.join([f'<script src="./{plugin}"></script>' for plugin in all_plugins]), 8)}
+{add_offset_to_string(deck_builtin_scripts, 8)}
         <script>
             Reveal.initialize({{
 { add_offset_to_string(reveal_config_str, 14) }
 { add_offset_to_string(plugin_config_str, 14) }
-            plugins: [{plugin_name_list}]
+            plugins: ["""
+        + "{{ global_plugin_names }}"
+        + plugins_init_suffix
+        + """
+            ]
             }});
         </script>
     </body>
 </html>
 """
+    )
 
     reveal_template_path = source_root / config["reveal_template"]
     with reveal_template_path.open("w", encoding="utf-8") as f:

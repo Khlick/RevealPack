@@ -5,6 +5,20 @@ All notable changes to RevealPack will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.0] - 2026-03-27
+
+### Added
+- **Per-deck Reveal plugins** via `presentation.json` → **`plugins`**:
+  - **`reveal`**: array of `{ "name": "..." }` entries (e.g. `markdown`, `mathjax4`). Names are resolved to filesystem bundles under cached reveal.js and to JS identifiers (`RevealMarkdown`, `RevealMath.MathJax4`, etc.); invalid names are skipped with a warning.
+  - **`external`**: array of `{ "name": "...", "source": "https://..." }` for CDN scripts; **source** is the URL in the generated `<script>` tag.
+
+### Changed
+- `reveal_template.html` uses `{{ global_plugin_names }}` plus normalized `deck.plugins.reveal` / `deck.plugins.external` (prepared at build with `slug`, `js_id`, and validated **source**).
+- **`copy_plugins()`** unions filesystem slugs required by deck `plugins.reveal` (after validation) with global `built_in` plugins.
+
+### Technical Details
+- `revealpack/_utils/reveal_plugin_helpers.py` (resolution, cache checks, `prepare_deck_plugins`); updates to `revealpack/setup.py` and `revealpack/build.py`; `docs/presentation.md`.
+
 ## [1.5.0] - 2026-03-27
 
 ### Added

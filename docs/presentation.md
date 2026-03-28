@@ -30,10 +30,39 @@ overview of the possible fields and how they are used:
 |             | `middle`     | Content for the middle part of the footer.                                               | String                                                |
 |             | `right`      | Content for the right part of the footer.                                                | String                                                |
 | `slides`    |              | An array of HTML filenames that represent the slides in the presentation.                | Array of strings                                      |
+| `plugins`   |              | Optional. Extra Reveal.js plugins for this deck only (see below).                         | Object with `reveal` and `external`                  |
 | `head`      |              | Contains optional head elements such as custom scripts and styles.                       |                                                       |
 |             | `scripts`    | An array of JavaScript filenames to be included in the head of the HTML.                 | Array of strings (file paths relative to `libraries`) |
 |             | `styles`     | An array of CSS filenames to be included in the head of the HTML.                        | Array of strings (file paths relative to `libraries`) |
 |             | `raw`        | An array of raw HTML strings to be injected directly into the head of the HTML.          | Array of strings                                      |
+
+### `plugins`
+
+Use this object when a deck needs extra Reveal.js plugins, or when loading a third-party script by URL.
+
+| Sub-field | Description |
+| --------- | ----------- |
+| `reveal` | Array of objects `{ "name": "..." }` only. Each **name** identifies a plugin shipped with reveal.js. Names are checked against the **cached** `source/cached/reveal.js` tree (e.g. `dist/plugin/<slug>.js` on Reveal 6, or `plugin/<slug>/` on Reveal 5): unknown names are skipped with a warning. Examples: `notes`, `markdown`, `zoom`, `math` (uses your global `plugin_configurations` MathJax variant), or explicit math variants such as `mathjax4` / `mathjax3` / `katex` (all use the `math` bundle with the matching `RevealMath.*` identifier). |
+| `external` | Array of objects `{ "name": "GlobalExportName", "source": "https://..." }`. Each **source** is emitted as `<script src="...">` before `Reveal.initialize`. **name** is the global passed into the `plugins: [...]` array. |
+
+**Example:**
+
+```json
+"plugins": {
+  "reveal": [
+    { "name": "markdown" },
+    { "name": "mathjax4" }
+  ],
+  "external": [
+    {
+      "name": "RevealCustom",
+      "source": "https://example.com/reveal-custom.js"
+    }
+  ]
+}
+```
+
+After changing `plugins`, run `revealpack build` (and `revealpack setup` if you changed reveal.js version). Run `revealpack setup` once after upgrading RevealPack so `reveal_template.html` matches the current Jinja.
 
 ## Specific Configurations
 

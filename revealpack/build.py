@@ -26,6 +26,11 @@ from _utils.presentation_operations import (
     dict_to_html_attrs,
     validate_titlepage,
 )
+from _utils.reveal_plugin_helpers import (
+    deck_reveal_slugs_for_copy,
+    global_plugin_names_for_initialize,
+    prepare_deck_plugins,
+)
 
 # Major version of cached Reveal.js (e.g. 5, 6); set by load_revealjs_major_version().
 REVEALJS_MAJOR_VERSION = None
@@ -275,7 +280,18 @@ def copy_plugins():
 
     reveal_root = Path(source_root) / "cached" / "reveal.js"
     major = load_revealjs_major_version(reveal_root)
-    builtin_plugins = config["packages"]["reveal_plugins"]["built_in"]
+    presentation_root = os.path.join(
+        source_root,
+        config["directories"]["source"]["presentation_root"],
+    )
+    deck_extra = deck_reveal_slugs_for_copy(
+        presentation_root, config, reveal_root, major
+    )
+    builtin_plugins = list(
+        dict.fromkeys(
+            list(config["packages"]["reveal_plugins"]["built_in"]) + list(deck_extra)
+        )
+    )
 
     # Reveal 5: copy each plugin folder (plugin/<name>/…).
     # Reveal 6+: copy packaged bundles (dist/plugin/<name>.js); highlight also copies
@@ -662,6 +678,11 @@ def generate_presentation(decks=None):
     )
     env.filters["to_html_attrs"] = dict_to_html_attrs
 
+    global_plugin_names = global_plugin_names_for_initialize(config)
+
+    reveal_cached = Path(config["directories"]["source"]["root"]) / "cached" / "reveal.js"
+    deck_plugin_major = load_revealjs_major_version(reveal_cached)
+
     # Load the reveal template
     pres_template_path = os.path.join(
         config["directories"]["source"]["root"], config["reveal_template"]
@@ -738,12 +759,16 @@ def generate_presentation(decks=None):
             page_title_str = " ".join(titlepage["headline"]).strip()
             deck["titlepage"] = titlepage
         
-        deck["title"] = str(page_title_str)    
-        
+        deck["title"] = str(page_title_str)
+
+        prepare_deck_plugins(deck, config, reveal_cached, deck_plugin_major)
+
         logging.info(f"Finished parsing '{str(page_title_str)}'.")
 
         # Render the HTML
-        rendered_html = template.render(deck=deck)
+        rendered_html = template.render(
+            deck=deck, global_plugin_names=global_plugin_names
+        )
         
         # Store rendered HTML for later
         rendered_presentations.append({
