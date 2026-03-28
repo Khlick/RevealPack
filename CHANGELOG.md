@@ -5,6 +5,23 @@ All notable changes to RevealPack will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0] - 2026-03-27
+
+### Added
+- **Reveal.js 6.x support** alongside existing **5.x** support: setup and build detect the cached Reveal major version and adjust built-in plugin copy paths, highlight theme locations, and generated `<script src>` paths (flat `dist/plugin/<name>.js` for 6.x vs nested `plugin/<name>/` for 5.x).
+- **Config vs cache warning**: `revealpack build` logs a warning when `packages.reveal.js` disagrees with `source/cached/reveal.js/package.json`, prompting a refresh with `revealpack setup --force-plugin-download`.
+
+### Changed
+- **Default new projects** (`revealpack init`): Reveal.js **6.0.0**, MathJax **4.1.1** via `plugin_configurations.mathjax4` (including CDN URL `mathjax@4.1.1`).
+- **Documentation** updated for 5.x vs 6.x plugin layout, supported versions (minimum Reveal **5.0**), and refreshed examples across README and `docs/`.
+- **`revealpack/config.json`**: aligned with new defaults; fixed typo `directories.pacakge` → `package`.
+
+### Fixed
+- **Build logging**: project title log line no longer relies on nested double quotes inside an f-string (broader Python compatibility).
+
+### Technical Details
+- Modified `revealpack/setup.py` (`parse_reveal_js_major_version`, template plugin and highlight paths), `revealpack/build.py` (`load_revealjs_major_version`, `copy_plugins`, `copy_reveal`, `compile_theme` / highlight helpers, `warn_reveal_config_cache_mismatch`), and `revealpack/__init__.py` (`generate_config`).
+
 ## [1.4.8] - 2025-02-24
 
 ### Added
